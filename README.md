@@ -1,7 +1,7 @@
 # FtB575
 Version 575 of Online Rhythm Game, Feel the Beats  
 
-[Most Up-To-Date Semi-Public Online Build](https://feelthebeats.se/575_2016_08_21/edit/)  
+[Most Up-To-Date Semi-Public Online Build](https://feelthebeats.se/575_2016_08_26/edit/)  
 
 Some Reminders Copy-Pasted From [The FtB5 /boards/ Dev News Subboard](https://feelthebeats.se/boards/?nyan=13):  
 
