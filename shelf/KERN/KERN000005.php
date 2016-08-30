@@ -76,12 +76,12 @@ var KERN000005 = {
 			stabilize_SUB  : function(){var _ = this.o;
 				var outboundF = F;
 				if (typeof _.ascRoot === "undefined"){_.ascRoot = _.min;}
-				if (this.if("incSignal") && _.incSignal !== N){
+				if (this.if("incSignal")){
 					_.value += _.snap;
 					_.valueValidSignal=!_.valueValidSignal;
 					this.changed({datA:[["value",_.value],["valueValidSignal",_.valueValidSignal]]});
 					outboundF = T;}
-				if (this.if("decSignal") && _.incSignal !== N){
+				if (this.if("decSignal")){
 					_.value -= _.snap;
 					_.valueValidSignal=!_.valueValidSignal;
 					this.changed({datA:[["value",_.value],["valueValidSignal",_.valueValidSignal]]});
@@ -157,15 +157,15 @@ var KERN000005 = {
 				var magnitude_aaa = Math.abs(_.n)/(_.nMax-_.nMin)*1000;
 				if (_.n < 0){magnitude_aaa /= _.side_aa;}
 				else        {magnitude_aaa /= _.side_ab;}
-				µ.ma(document.head,µ.m({type:"style",d:{"data-unique":this.base},css:{
+				µ.maCSS(document.head,this.base,µ.cssCompile({
 					[".KERN000005AA" +this.base] : "¥:"+(_.n<0?pos_aa:pos_ab)+";¥"+unit+":"+((_.n<0?_.side_aa:_.side_ab)*1000)+"‰;¥"+unitOther+":1000‰;",
 					[".KERN000005AAA"+this.base] : "¥:"+(_.n<0?pos_ab:pos_aa)+";¥"+unit+"min:1px;¥"+unit+":"+magnitude_aaa+"‰;¥"+unitOther+":1000‰;¥bgi:linear-gradient("+(Math.sign(_.n)*deg)+"deg,"+hslma(_.co,_.bg,0.7)+","+hslma(_.co,_.tx,0.9)+");",
 					[".KERN000005AC" +this.base] : "transform:rotate("+degTxt+"deg);",
-				}}));
+				}));
 				if (_.el_ac !== N){_.el_ac.innerHTML = str(_.valueFxn(_.value,_.snapDecimalPlaceC,_));}},
 		});
-		oo.portInP .pushA([["value",KERNTypeO.number],["incSignal",KERNTypeO.flag],["decSignal",KERNTypeO.flag],["min",KERNTypeO.number],["max",KERNTypeO.number],["snap",KERNTypeO.number],["dirAsc",KERNTypeO.string],["valueFxn",KERNTypeO.function],["ascMode",KERNTypeO.string],["ascRoot",KERNTypeO.string]]);
-		oo.portOutP.pushA([["value",KERNTypeO.number],["valueValidSignal",KERNTypeO.flag]]);
+		oo.portInP .pushA([["value",KERNTypeO.number],["incSignal",KERNTypeO.signal],["decSignal",KERNTypeO.signal],["min",KERNTypeO.number],["max",KERNTypeO.number],["snap",KERNTypeO.number],["dirAsc",KERNTypeO.string],["valueFxn",KERNTypeO.function],["ascMode",KERNTypeO.string],["ascRoot",KERNTypeO.string]]);
+		oo.portOutP.pushA([["value",KERNTypeO.number],["valueValidSignal",KERNTypeO.signal]]);
 		return oo;},
 	};
 </script>

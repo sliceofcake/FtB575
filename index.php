@@ -1,4 +1,6 @@
 <?
+require_once("/home/ftbsliceofcake2/gate/gate_575.php");
+
 function calcDirBaseOfVer(){
 	$pathPre  = $_SERVER["DOCUMENT_ROOT"]; // example: /home/ftbsliceofcake2/feelthebeats.se
 	$pathPost = $_SERVER["PHP_SELF"]; // example: /575/index.php

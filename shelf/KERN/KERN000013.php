@@ -34,9 +34,9 @@ var KERN000013 = {
 				_.elO.aa = µ.qd(".KERN000013AA"+this.base);},
 			refresh_SUB  : function(){var _ = this.o;
 				if (_.elO.aa.value !== _.txt){_.elO.aa.value = _.txt;}
-				µ.ma(document.head,µ.m({type:"style",d:{"data-unique":this.base},css:{
+				µ.maCSS(document.head,this.base,µ.cssCompile({
 					[".KERN000013AA"+this.base] : "¥c:"+hsla(_.tx)+";¥fs:"+_.fs+"px;"+(_.lineWrap?"white-space:nowrap;":"white-space:normal;"),
-				}}));},
+				}));},
 		});
 		oo.portInP .pushA([["txt",KERNTypeO.string],["fs",KERNTypeO.string]]);
 		oo.portOutP.pushA([["txt",KERNTypeO.string],["fs",KERNTypeO.string]]);

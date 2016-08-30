@@ -1,4 +1,6 @@
 <?
+require_once("/home/ftbsliceofcake2/gate/gate_575.php");
+
 require_once("butler.php");
 require_once("mysql.php");
 //----------------------------------------------------------------------------------------------------------------------

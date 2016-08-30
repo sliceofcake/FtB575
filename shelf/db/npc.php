@@ -1,4 +1,6 @@
 <?
+require_once("/home/ftbsliceofcake2/gate/gate_575.php");
+
 $NPC = array(
 	array("NPC","hello"), /* FtB3 had a ghost trigger macro to echo "hello" from a random possessed account randomly upon processing a "hello" message in the chat */
 	array("NPC","I love FtB!"),

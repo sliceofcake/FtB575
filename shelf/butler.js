@@ -350,6 +350,7 @@ var µ = {
 		return css;},
 	// element [macro] assert
 	ma:function(elOut,elIn){
+		if (elOut === N){return;}
 		var elID_elIn = this.elID(elIn);
 		var elMatch = this.ic2(elOut).find(v=>this.elID(v)===elID_elIn);
 		if (typeof elMatch === "undefined"){elOut.appendChild(elIn);return T;} // no partner found ; append
@@ -567,10 +568,10 @@ var µ = {
 		s = s.replace(/¥([^¥:;]+):([^;]+);/g,cssTranslateCallbackOne);
 		return s;},
 	// generate a bullshit-css™ element
-	bscss:function(label,macro,q=""){
+	bscss:function(label,macro,q="",qLabel=""){
 		return [q+".BSCSS[data-label='"+label+"']",[
 			macro,
-			[".label",label],]];},
+			[qLabel+".label",label],]];},
 	offsetLeftTotal:function(el){
 		var left = 0;
 		do {
@@ -1789,18 +1790,20 @@ var anipnt = {
 		ctx.arc(x*pxd,y*pxd,pxd*diameter/2,0,Math.PI*2,true);
 		//ctx.closePath();
 		ctx.fill();},
-	drawLine : function(ctx,x,y,xx,yy,w,color,pxd=1){
+	drawLine : function(ctx,x,y,xx,yy,w,color,lineCap="butt",pxd=1){
 		if (ctx.strokeStyle !== color){ // !!! theory that this actually hurts performance
 			ctx.strokeStyle =   color;}
 		if (ctx.lineWidth !== w){ // !!! theory that this actually hurts performance
 			ctx.lineWidth =   w;}
+		if (ctx.lineCap !== lineCap){ // !!! theory that this actually hurts performance
+			ctx.lineCap =   lineCap;}
 		if (w === 0){return;} // canvas handles a 0-width improperly, so we need to ignore it here
 		ctx.beginPath();
 		ctx.moveTo(x*pxd,y*pxd);
 		ctx.lineTo(xx*pxd,yy*pxd);
 		//ctx.closePath();
 		ctx.stroke();},
-	drawRay  : function(ctx,x,y,angle,l,w,color,pxd=1){this.drawLine(ctx,x,y,x+Math.cos(angle)*l,y-Math.sin(angle)*l,w,color,pxd);},
+	drawRay  : function(ctx,x,y,angle,l,w,color,lineCap="butt",pxd=1){this.drawLine(ctx,x,y,x+Math.cos(angle)*l,y-Math.sin(angle)*l,w,color,lineCap,pxd);},
 	fillText : function(ctx,s,x,y,color,pxd=1){
 		font_FREEZE = ctx.font;
 		ctx.font = ctx.font.replace(/(\d+)px/,(match,p1,offset,string)=>(num(p1)*2)+"px"); // not great, but hey--
@@ -1902,6 +1905,7 @@ var SortedArray = function(o={}){π.p(o,{arr:[],sortCompareFxn:U,searchCompareFx
 		mapO       : function(){return this.arr.mapO(arguments[0]);},
 		every      : function(){return this.arr.every(arguments[0]);},
 		forEach    : function(){this.arr.forEach(arguments[0]);},
+		filter     : function(){return this.arr.filter(arguments[0]);},
 		toString   : function(){return this.arr.toString();},
 	};
 	res.clean();

@@ -1,3 +1,5 @@
+<? require_once("/home/ftbsliceofcake2/gate/gate_575.php"); ?>
+
 <? //<!DOCTYPE html><html><head id="head"><meta charset="UTF-8"><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,user-scalable=yes,initial-scale=1"><title>FtB575 /boards/</title><link href="../image/favicon.png" rel="icon" type="image/png">?>
 <? //<body></body></html>?>
 <? //die; ?>

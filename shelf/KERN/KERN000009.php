@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 		".KERN000009AAA>*"                                           :"¥:absolute;¥:NW;¥s:1000‰;",
 		".KERN000009AAAA"                                            :"¥:block;¥s:1000‰;¥bo:none;",
 		".KERN000009AAAB"                                            :"¥:block;¥s:1000‰;¥op:0;¥:hand;",
-		".KERN000009AB"                                              :"¥:block;¥w:200‰;¥h:1000‰;¥f:left;",
+		".KERN000009AB"                                              :"¥:block;¥w:200‰;¥h:1000‰;¥f:left;¥fs:850‰;",
 		".KERN000009ABA"                                             :"¥:block;¥w:1000‰;¥h:500‰;",
 		".KERN000009ABB"                                             :"¥:block;¥w:1000‰;¥h:500‰;",
 		".KERN000009AC"                                              :"¥:block;¥w:200‰;¥h:1000‰;¥f:left;",
@@ -35,9 +35,9 @@ var KERN000009 = {
 			},
 			stabilize_SUB   : function(){var _ = this.o;},
 			refresh_SUB  : function(){var _ = this.o;
-				µ.ma(document.head,µ.m({type:"style",d:{"data-unique":this.base},css:{
-					//[base+".KERN000009A"] : "¥bgc:"+hsla(_.bg,_.bg[3])+";",
-				}}));
+//				µ.maCSS(document.head,this.base,µ.cssCompile({
+//					[base+".KERN000009A"] : "¥bgc:"+hsla(_.bg,_.bg[3])+";",
+//				}));
 				var title = jj(_.fil,"name");
 				for (var i = 0; i < 1; i++){
 					var macro = µ.m([[
@@ -50,7 +50,7 @@ var KERN000009 = {
 								[".KERN000009ABA"+this.base,π.byteCToFancy(jj(_.fil,"size",0))],
 								[".KERN000009ABB"+this.base,jj(_.fil,"type","N/A")],
 							]],
-							µ.bscss("clear",[".button.KERN000009ACA"+this.base,{click:function(that){return function(){that.inbound({datA:[["fil",N]]});};}(this)}],".KERN000009AC"+this.base),
+							µ.bscss("⌫",[".button.KERN000009ACA"+this.base,{click:function(that){return function(){that.inbound({datA:[["fil",N]]});};}(this)}],".KERN000009AC"+this.base),
 						]]
 					]]);}
 				µ.rr(this.elP,macro);},

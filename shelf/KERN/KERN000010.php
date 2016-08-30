@@ -153,13 +153,13 @@ var KERN000010 = {
 				_.counter = 0;},
 			refresh_SUB   : function(o={}){var _ = this.o;
 				if (this.if("tx","co","bg","aDim")){
-					µ.ma(document.head,µ.m({type:"style",d:{"data-unique":this.base},css:{
+					µ.maCSS(document.head,this.base,µ.cssCompile({
 						[".KERN000010AA" +this.base] : "¥c:"+hsla(_.co)+";",
 						[".KERN000010AAA"+this.base] : "¥c:"+hsla(_.co)+";¥op:"+str(_.aDim)+";",
 						[".KERN000010AAB"+this.base] : "¥c:"+hsla(_.co)+";¥op:"+str(_.aDim)+";",
 						[".KERN000010AAC"+this.base] : "¥c:"+hsla(_.co)+";¥op:"+str(_.aDim)+";",
 						[".KERN000010AAD"+this.base] : "¥c:"+hsla(_.co)+";¥op:"+str(_.aDim)+";",
-					}}));}
+					}));}
 				_.counter = 0;},
 			drawFrame_SUB : function(){var _ = this.o;
 				_.skipCorrection();

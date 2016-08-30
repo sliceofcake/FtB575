@@ -37,9 +37,9 @@ var KERN000012 = {
 						[".KERN000012AA"+this.base],]]
 				]]));},
 			refresh_SUB  : function(){var _ = this.o;
-				µ.ma(document.head,µ.m({type:"style",d:{"data-unique":this.base},css:{
+				µ.maCSS(document.head,this.base,µ.cssCompile({
 					[".KERN000012AA"+this.base] : "¥bgr:"+_.bgr+";¥bgs:"+_.bgs+";¥bgo:"+_.bgo+";¥bgp:"+_.bgp+";¥bga:"+_.bga+";¥bgi:url("+_.url+");",
-				}}));},
+				}));},
 		});
 		oo.portInP .pushA([["fil",KERNTypeO.complexReference],["bgr",KERNTypeO.string],["bgs",KERNTypeO.string],["bgo",KERNTypeO.string],["bgp",KERNTypeO.string],["bga",KERNTypeO.string],["bgi",KERNTypeO.string]]);
 		oo.portOutP.pushA([["fil",KERNTypeO.complexReference]]);

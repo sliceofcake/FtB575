@@ -102,9 +102,9 @@ var KERN000007 = {
 				var sAngle = _.partToAngle(s/60);
 				var mAngle = _.partToAngle(m/60);
 				var hAngle = _.partToAngle(h/24);
-				var mod = Math.floor(      (Ω.fps/_.secondHandFPS));if (mod === 0){mod = 1;}if (_.counter%mod===0){anipnt.clearRect(_.ctxO.f,0,0,_.w,_.h,_.pxd);anipnt.drawRay(_.ctxO.f,center.x,center.y,sAngle,_.sHandH*_.handTransformMultiplier,_.sHandW,_.sHandCoS,_.pxd);}
-				var mod = Math.floor(60*   (Ω.fps/_.secondHandFPS));if (mod === 0){mod = 1;}if (_.counter%mod===0){anipnt.clearRect(_.ctxO.e,0,0,_.w,_.h,_.pxd);anipnt.drawRay(_.ctxO.e,center.x,center.y,mAngle,_.mHandH*_.handTransformMultiplier,_.mHandW,_.mHandCoS,_.pxd);}
-				var mod = Math.floor(60*60*(Ω.fps/_.secondHandFPS));if (mod === 0){mod = 1;}if (_.counter%mod===0){anipnt.clearRect(_.ctxO.d,0,0,_.w,_.h,_.pxd);anipnt.drawRay(_.ctxO.d,center.x,center.y,hAngle,_.hHandH*_.handTransformMultiplier,_.hHandW,_.hHandCoS,_.pxd);}
+				var mod = Math.floor(      (Ω.fps/_.secondHandFPS));if (mod === 0){mod = 1;}if (_.counter%mod===0){anipnt.clearRect(_.ctxO.f,0,0,_.w,_.h,_.pxd);anipnt.drawRay(_.ctxO.f,center.x,center.y,sAngle,_.sHandH*_.handTransformMultiplier,_.sHandW,_.sHandCoS,"round",_.pxd);}
+				var mod = Math.floor(60*   (Ω.fps/_.secondHandFPS));if (mod === 0){mod = 1;}if (_.counter%mod===0){anipnt.clearRect(_.ctxO.e,0,0,_.w,_.h,_.pxd);anipnt.drawRay(_.ctxO.e,center.x,center.y,mAngle,_.mHandH*_.handTransformMultiplier,_.mHandW,_.mHandCoS,"round",_.pxd);}
+				var mod = Math.floor(60*60*(Ω.fps/_.secondHandFPS));if (mod === 0){mod = 1;}if (_.counter%mod===0){anipnt.clearRect(_.ctxO.d,0,0,_.w,_.h,_.pxd);anipnt.drawRay(_.ctxO.d,center.x,center.y,hAngle,_.hHandH*_.handTransformMultiplier,_.hHandW,_.hHandCoS,"round",_.pxd);}
 				_.counter++;if (_.counter >= 3600){_.counter = 0;}},
 		});
 		oo.portInP .pushA([["pxd",KERNTypeO.number],["hHandW",KERNTypeO.number],["mHandW",KERNTypeO.number],["sHandW",KERNTypeO.number],["hHandH",KERNTypeO.number],["mHandH",KERNTypeO.number],["sHandH",KERNTypeO.number],["sHandCo",KERNTypeO.complex],["mHandCo",KERNTypeO.complex],["hHandCo",KERNTypeO.complex]]);

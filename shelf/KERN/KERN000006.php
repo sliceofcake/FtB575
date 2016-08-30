@@ -253,6 +253,12 @@ var KERN000006 = {
 						break;case "Decon082_ver1":
 							anipnt.clearRect(ctx,0,0,w,h,_.pxd);
 							_.modO_Decon082_ver1.overlayA.forEach(overlay=>{
+								// look, I'm tired, okay? only Decon082 ever uses this mod. please. errors. go away. go. away.
+								if (typeof overlay     === "undefined"
+								||  typeof overlay.p1  === "undefined"
+								||  typeof overlay.p2  === "undefined"
+								||  typeof overlay.co1 === "undefined"
+								||  typeof overlay.co2 === "undefined"){ll("decon's overlay is messed up");return;}
 								// yy ≥ y, meaning yy is further down, since canvas origin is NW
 								var {p1,p2,co1,co2} = overlay;
 								if (p1 > p2){
@@ -551,6 +557,7 @@ var KERN000006 = {
 				if (typeof _.laneActiveCoA      === "undefined"){_.laneActiveCoA      = Array(_.keyC+1).fill(0).map((v,i)=>(i===0)?"transparent":hslma(noteCoA_RAW[i],_.bg,0.2 ,_.bg[3]));}
 				if (typeof _.hitboxCoA          === "undefined"){_.hitboxCoA          = Array(_.keyC+1).fill(0).map((v,i)=>(i===0)?"transparent":hsla (noteCoA_RAW[i]          ,    0.5));}
 				if (typeof _.hitboxActiveCoA    === "undefined"){_.hitboxActiveCoA    = Array(_.keyC+1).fill(0).map((v,i)=>(i===0)?"transparent":hslma(noteCoA_RAW[i],_.tx,0.3 ,    1  ));}
+				if (this.if("noteFadedCoA","noteCoA","noteActiveCoA","laneWarningPreCoA","laneWarningPostCoA","laneCoA","laneActiveCoA","hitboxCoA","hitboxActiveCoA")){_.renderRegister("N");}
 				if (this.if("missBoundary")){
 					_.hitC     = _.chartBox.noteA.reduceSum(note=>typeof note.tail === "undefined");
 					_.holdC    = _.chartBox.noteA.reduceSum(note=>typeof note.tail !== "undefined");
@@ -794,9 +801,9 @@ var KERN000006 = {
 			["noteOffset",KERNTypeO.number],
 			["speedMultiplier",KERNTypeO.number],
 			["keyStateA",KERNTypeO.array,KERNTypeO.number],
-			["translateSignalO",KERNTypeO.object,KERNTypeO.complex],
+			["translateSignalO",KERNTypeO.object,KERNTypeO.signal],
 			["modO_Decon082_ver1",KERNTypeO.object,KERNTypeO.array,KERNTypeO.object,KERNTypeO.complex],
-			["tTentativeSignal",KERNTypeO.flag],
+			["tTentativeSignal",KERNTypeO.signal],
 			["tTentative",KERNTypeO.number],
 		].concat(colornameA.map(colorname=>[colorname,KERNTypeO.array,KERNTypeO.complex])));
 		oo.portOutP.pushA([
@@ -805,7 +812,7 @@ var KERN000006 = {
 			["holdC",KERNTypeO.number],
 			["passedHeadC",KERNTypeO.number],
 			["passedTailC",KERNTypeO.number],
-			["scoreResetSignal",KERNTypeO.flag],
+			["scoreResetSignal",KERNTypeO.signal],
 			["earnedHeadC",KERNTypeO.number],
 			["earnedTailC",KERNTypeO.number],
 			["translatedSO",KERNTypeO.object,KERNTypeO.string],["duration",KERNTypeO.number],["score",KERNTypeO.number],["scoreMaxSoFar",KERNTypeO.number],["playbackRate",KERNTypeO.number],["state",KERNTypeO.string],["chartP",KERNTypeO.number],["volume",KERNTypeO.number]]);

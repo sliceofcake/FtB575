@@ -1,8 +1,11 @@
-<? /* sliceofcake.se */
+<?
+require_once("/home/ftbsliceofcake2/gate/gate_575.php");
+
+/* sliceofcake.se */
 mb_internal_encoding("UTF-8");
 /* use utf8 or better for character encoding */
 /* use double quotes for your php query strings, and single quotes for the params */
-$ERROR_LOG_PATH = "/home/ftbsliceofcake2/logs/feelthebeats.se/mysql";
+$ERROR_LOG_PATH = "/home/ftbsliceofcake2/logs/feelthebeats.se/mysql/";
 $SQL_HOSTNAME="127.0.0.1";
 $SQL_USERNAME="ftbdb";
 require("/home/ftbsliceofcake2/secret/mysql_7.php");

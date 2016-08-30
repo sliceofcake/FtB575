@@ -4,7 +4,7 @@
 var KERNCounter = 1;
 var KERNA = [];
 var KERNDump = function(){KERNA.forEach(v=>{v.registerA.forEach(vv=>{ll(v+" -> "+vv.rcvRoot+" : "+π.jsonE(vv.portA));});});};
-var KERNTypeO = {array:0,object:1,number:2,string:3,boolean:4,flag:4,complex:5,function:6,complexReference:7}; // complex will permit anything, complexReference will be referenced, not duplicated
+var KERNTypeO = {array:0,object:1,number:2,string:3,boolean:4,flag:4,complex:5,function:6,complexReference:7,signal:8}; // complex will permit anything, complexReference will be referenced, not duplicated
 var KERNTypeDefault = function(type){
 	switch (type){default : return U;
 		break;case 0 : return [];
@@ -14,7 +14,8 @@ var KERNTypeDefault = function(type){
 		break;case 4 : return F;
 		break;case 5 : return N;
 		break;case 6 : return function(){};
-		break;case 7 : return N;}};
+		break;case 7 : return N;
+		break;case 8 : return F;}};
 // for debugging output
 var KERNDebugIndentLevel = 0;
 var KERNDebugMicrosecondTolerance = 100;
@@ -27,7 +28,7 @@ var KERNll = ()=>{};
 // It then passes execution to the "_SUB" version to do specific things, expected to be implemented by the creator of the specific KERN element.
 
 var KERN = function(o={}){
-	while(KERNA.some(root=>root.counter===KERNCounter)){KERNCounter++;}
+	while(KERNA.some(root=>typeof root !== "undefined" && root.counter===KERNCounter)){KERNCounter++;}
 	// return negative shifts "a" left
 	// return 0 generally doesn't do anything, but not safe to assume much else
 	// return positive shifts "a" right
@@ -41,6 +42,7 @@ var KERN = function(o={}){
 	var oo = {
 		name       : "KERN000000",
 		counter    : KERNCounter,
+		ID         : "", // the save file spec made this necesary
 		base       : "¥KERN_0", // filled later
 		elP        : N,
 		o          : {}, // where KERN#-specific variables go, including public variables
@@ -68,7 +70,7 @@ var KERN = function(o={}){
 			for (var portI = 0; portI < o.portA.length; portI++){var port = o.portA[portI];
 				entry.portA.push(port);}
 			this.alteredPropertyAllF = T;
-			this.outbound();
+			this.outbound({automaticF:T});
 			this.alteredPropertyAllF = F;},
 		registerDessert  : function(o={}){π.p(o,{rcvRoot:N,portA:[]});
 			var entryI = this.registerA.findIndex(v=>v.rcvRoot===o.rcvRoot);
@@ -155,6 +157,8 @@ var KERN = function(o={}){
 		inbound_SUB   : function(o={}){},
 		inbound       : function(o={}){var startT = π.now();KERNll(KERNDebugIndentS.repeat(KERNDebugIndentLevel)+"v inbound "+this.base);KERNDebugIndentLevel++;
 			π.p(o,{datA:[],setupF:F});var _ = this.o;
+//			if (this.counter === 3){ll(π.jsonE(o));}
+			if (this.ID.indexOf("global") === 0){ll(this.ID+" inbound");}
 			
 			this.alteredPropertyP    .clear();
 			this.alteredPropertyFullP.clear();
@@ -171,10 +175,12 @@ var KERN = function(o={}){
 				var access = k;entryFull.push(access);
 				var entry = base[access];
 				//ll(entry,propEnt);
+				//if (this.counter === 1){ll(π.jsonE(guide)+" "+π.jsonE(propEnt));}
 				for (var i = 1; i < propEnt.length-1; i++){
-					if (typeof entry[propEnt[i]] === "undefined"){
+					if (i < propEnt.length-2 && typeof entry[propEnt[i]] === "undefined"){
+						//if (this.counter === 1 && guide[0] === "modO_Decon082_ver1"){ll(i+" : "+π.jsonE(guide)+" : "+π.jsonE(KERNTypeDefault(guide[i])));}
 						// ? remnant from when o.forceF was a thing : if (guide === N){ll("KERN ERROR : You're forcing me to accept this inbound collection, so auto-construction is disabled for this property : "+propEnt[0]);return;}
-						entry[propEnt[i]] = KERNTypeDefault(guide[i]);} // pre-fill the object/array if undefined slot
+						entry[propEnt[i]] = KERNTypeDefault(guide[i+1]);} // pre-fill the object/array if undefined slot
 					// follow the chain
 					base = entry;
 					access = propEnt[i];entryFull.push(access);
@@ -223,16 +229,10 @@ var KERN = function(o={}){
 		drawFrame     : function(now){this.drawFrame_SUB(now);},
 		
 		outbound_SUB  : function(){},
-		outbound      : function(){var startT = π.now();KERNll(KERNDebugIndentS.repeat(KERNDebugIndentLevel)+"v outbound "+this.base);KERNDebugIndentLevel++;
+		outbound      : function(o={}){var startT = π.now();KERNll(KERNDebugIndentS.repeat(KERNDebugIndentLevel)+"v outbound "+this.base);KERNDebugIndentLevel++;
+			π.p(o,{automaticF:F});
 			var _ = this.o;
 			
-			/*if (this.outboundAllF){KERNA.forEach(v=>{
-				//if(v===this){return;} // needed previous to avoid self-looping, should be fixed now
-				var feedO = this.outboundAllPortO.mapO((to,from)=>({[to]:_[from]}));
-				v.inbound({o:feedO});});}
-			KERNA.filter(v=>v.inboundAllF).forEach(v=>{
-				var feedO = v.inboundAllPortO.mapO((to,from)=>({[to]:_[from]}));
-				v.inbound({o:feedO});});*/
 			// portP might look like :
 			// [[["coValue0"],["tx"]],[["coValue1"],["co"]],[["coValue2"],["bg"]],[["valueA",5],["somethingA",14,32]]]
 			// meaning :
@@ -245,15 +245,29 @@ var KERN = function(o={}){
 			var otherAllA = [];
 			// !!! infinite loop hunch : it's feeding itself and deadEndSA isn't working
 			if (this.outboundAllF){
-				KERNA.forEach(rcvRoot=>{
+				KERNA.forEach(rcvRoot=>{if (typeof rcvRoot === "undefined"){return;}
+//					if (rcvRoot.ID.indexOf("global") === 0){ll(this.counter+" -> "+rcvRoot.ID);}
 					otherAllA.push({rcvRoot,portA:this.outboundAllPortA});});}
+//if (this.ID === "globalCo0"){ll("---------------------");}
+			var backlogA = [];
 			[this.registerA,otherAllA].forEach(a=>{
 				a.forEach(connection=>{
 					var datA = [];
 					connection.portA.forEach(pair=>{
 						var sndChain = pair[0];
 						//KERNll(sndChain[0]+" ... "+π.jsonE(this.alteredPropertyP.arr));
+						// only send signals if they were sent by the user directly, none of this auto piping stuff [signals are not constantly driving]
+						if (o.automaticF){
+							var guideK = this.portOutP.indexOf(sndChain[0]);
+							if (guideK === -1){ll("KERN ERROR : Element "+this.name+"_"+this.counter+" is attempting to send a non-registered property. (See the following line for the propertyname)",sndChain[0]);return;}
+							var guide = this.portOutP.get(guideK);
+							if (guide[guide.length-1] === KERNTypeO.signal){return;}}
+//if (this.ID === "globalCo0" && connection.rcvRoot.ID.indexOf("global") === 0){ll(">"+sndChain[0]+" ... "+connection.rcvRoot.ID);}
+						// v warning: this line's if() is not static, and if an element feeds into itself and others, all els coming after itself in the list will be potentially blocked.
+						// v          if feeding co into itself, it will inbound immediately, which will set the if() flag for co to lo, which will block furthers from receiving the original co.
+						// v          the fix here was to make sure the inbounds come after the all the logic is over
 						if (!this.if(sndChain[0])){return;} // property not changed, don't send it
+//if (this.ID === "globalCo0" && connection.rcvRoot.ID.indexOf("global") === 0){ll(">>");}
 						var rcvChain = pair[1];
 						var sndValue = _;
 						for (var i = 0; i < sndChain.length; i++){
@@ -262,7 +276,10 @@ var KERN = function(o={}){
 						res.push(sndValue); // pass by reference here, will decide whether to π.cc() in inbound()
 						datA.push(res);});
 					if (datA.length > 0){
-						connection.rcvRoot.inbound({datA});}});});
+						//connection.rcvRoot.inbound({datA});
+						backlogA.push({root:connection.rcvRoot,datA});}
+					});});
+			backlogA.forEach(v=>{if (v.datA.length > 0){v.root.inbound({datA:v.datA});}});
 			this.outbound_SUB();
 			this.alteredPropertyP    .clear();
 			this.alteredPropertyFullP.clear();
@@ -272,7 +289,7 @@ var KERN = function(o={}){
 		destroy       : function(){
 			uniani.unregister(this.base);
 			// make everyone forget about this element
-			KERNA.forEach(v=>{
+			KERNA.forEach(v=>{if (typeof v === "undefined"){return;}
 				var entryI = v.registerA.findIndex(v=>v.rcvRoot===o.rcvRoot);
 				if (entryI === -1){return;} // obviously, our work is not needed
 				v.registerA.splice(entryI,1);});
@@ -281,7 +298,7 @@ var KERN = function(o={}){
 		
 		toString      : function(){return "#"+this.counter+"("+this.name+")";},
 	};
-	KERNA.push(oo);
+	KERNA[KERNCounter] = oo; //KERNA.push(oo);
 	return oo;
 };
 </script>

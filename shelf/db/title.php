@@ -1,4 +1,6 @@
 <?
+require_once("/home/ftbsliceofcake2/gate/gate_575.php");
+
 $TITLE = [
 	// Studio Ghibli
 	["FtB: Castle in the Sky","Laputa: Castle in the Sky"],

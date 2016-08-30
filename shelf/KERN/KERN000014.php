@@ -77,6 +77,7 @@ var KERN000014 = {
 					_.earnedTailC = 0;
 					_.interfaceNeedsRefreshF = T;}
 				if (this.if("pxd")){_.preclSize();}
+				if (this.if("pxd","co")){_.interfaceNeedsRefreshF = T;}
 			},
 			setup_SUB : function(){var _ = this.o;
 				µ.rr(this.elP,µ.m([[
@@ -93,9 +94,9 @@ var KERN000014 = {
 				_.counter = 0;},
 			refresh_SUB : function(){var _ = this.o;
 				if (this.if("tx")){
-					µ.ma(document.head,µ.m({type:"style",d:{"data-unique":this.base},css:{
+					µ.maCSS(document.head,this.base,µ.cssCompile({
 						[".KERN000014AA"+this.base] : "¥c:"+hsla(_.tx)+";",
-					}}));}},
+					}));}},
 			drawFrame_SUB : function(){var _ = this.o;
 				if (_.counter++ % Math.ceil(Ω.fps/10) === 0){ // 10 fps target
 					if (_.interfaceNeedsRefreshF){
@@ -111,7 +112,7 @@ var KERN000014 = {
 			["holdC",KERNTypeO.number],
 			["passedHeadC",KERNTypeO.number],
 			["passedTailC",KERNTypeO.number],
-			["scoreResetSignal",KERNTypeO.flag],
+			["scoreResetSignal",KERNTypeO.signal],
 			["earnedHeadC",KERNTypeO.number],
 			["earnedTailC",KERNTypeO.number],
 		]);

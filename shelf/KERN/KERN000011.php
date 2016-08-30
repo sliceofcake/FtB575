@@ -45,19 +45,19 @@ var KERN000011 = {
 				µ.rr(this.elP,µ.m([[
 					[".KERN000011A"+this.base,{z:{KERN:this}},[
 						µ.bscss("key",["input.KERN000011AAA"+this.base,{keypress:function(e){e.preventDefault();},paste:function(e){e.preventDefault();},keydown:function(_){return function(e){_.which=e.which;_.location=e.location;this.value=π.keySetToEnglish(_.which,_.location);};}(_)}],".KERN000011AA"+this.base),
-						µ.bscss("trig.",[".button.KERN000011ABA"+this.base,{mousedown:function(that,_){return function(e){if (_.state!==1){_.state=1;that.changed({datA:[["state",_.state]]});that.outbound();}};}(this,_),mouseup:function(that,_){return function(e){if (_.state!==0){_.state=0;that.changed({datA:[["state",_.state]]});that.outbound();}};}(this,_)}],".KERN000011AB"+this.base),
+						µ.bscss("trig.",[".button.KERN000011ABA"+this.base,{mousedown:function(that,_){return function(e){if (_.state!==1){_.edgeHiSignal=!_.edgeHiSignal;_.state=1;that.changed({datA:[["state",_.state],["edgeHiSignal",_.edgeHiSignal]]});that.outbound();}};}(this,_),mouseup:function(that,_){return function(e){if (_.state!==0){_.edgeLoSignal=!_.edgeLoSignal;_.state=0;that.changed({datA:[["state",_.state],["edgeLoSignal",_.edgeLoSignal]]});that.outbound();}};}(this,_)}],".KERN000011AB"+this.base),
 					]]
 				]]));
 				_.el_aaa = µ.qd(".KERN000011AAA"+this.base);
 				_.el_aba = µ.qd(".KERN000011ABA"+this.base);},
 			refresh_SUB   : function(){var _ = this.o;
 				if (this.if("co")){
-					µ.ma(document.head,µ.m({type:"style",d:{"data-unique":this.base},css:{
+					µ.maCSS(document.head,this.base,µ.cssCompile({
 						//[this.base+".KERN000011A"               ] : "--fs-label:"+Math.floor(_.el_aaa.clientHeight/2)+"px;",
 						[".KERN000011AA" +this.base] : "¥c:"+hsla(_.co)+";",
 						[".KERN000011AAA"+this.base] : "¥c:"+hsla(_.co)+";",
 						[".KERN000011AB" +this.base] : "¥c:"+hsla(_.co)+";",
-					}}));}
+					}));}
 				if (this.if("which","location")){
 					_.el_aaa.value = _.english;}},
 			drawFrame_SUB : function(){var _ = this.o;
@@ -66,7 +66,7 @@ var KERN000011 = {
 				else{_.el_aba.classList.remove("active");}},
 		});
 		oo.portInP .pushA([["which",KERNTypeO.number],["location",KERNTypeO.number],["tx",KERNTypeO.string],["co",KERNTypeO.string],["bg",KERNTypeO.string],["state",KERNTypeO.string]]);
-		oo.portOutP.pushA([["which",KERNTypeO.number],["location",KERNTypeO.number],["tx",KERNTypeO.string],["co",KERNTypeO.string],["bg",KERNTypeO.string],["state",KERNTypeO.string],["edgeHiSignal",KERNTypeO.flag],["edgeLoSignal",KERNTypeO.flag]]);
+		oo.portOutP.pushA([["which",KERNTypeO.number],["location",KERNTypeO.number],["tx",KERNTypeO.string],["co",KERNTypeO.string],["bg",KERNTypeO.string],["state",KERNTypeO.string],["edgeHiSignal",KERNTypeO.signal],["edgeLoSignal",KERNTypeO.signal]]);
 		return oo;},
 	};
 </script>

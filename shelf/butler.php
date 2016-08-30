@@ -1,4 +1,5 @@
 <?
+require_once("/home/ftbsliceofcake2/gate/gate_575.php");
 
 define("T",TRUE);
 define("F",FALSE);
