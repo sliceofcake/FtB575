@@ -222,7 +222,7 @@ var KERN000006 = {
 					switch (o.which){default : ;
 						break;case "FtB4" :
 							return "###FILE ALREADY PARSED###\n"
-							+ box.bpmA.map(v=>"BPM "+π.chop(v.head/1000,3)+" "+π.chop(v.value,3)+"\n").join("")
+							+ box.bpmA.map(v=>"BPM "+π.chop(v.head/1000,3)+" "+π.chop(60000000/v.value,3)+"\n").join("")
 							+ box.noteA.map(v=>π.chop(v.head/1000,3)+((typeof v.tail === "undefined")?(""):("-"+π.chop(v.tail/1000,3)))+" 0 "+π.chop(v.lane)+"\n").join("");
 						break;case "o!m12" :case "o!m13" :case "o!m14" :
 							return "[TimingSection]\n"
