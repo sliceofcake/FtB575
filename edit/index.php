@@ -50,8 +50,6 @@ p.asrStyle = function(mode="root",dataUnique="root",o={}){
 			"body>¥toolbar>*"        : "¥:block;¥f:right;",
 			"body>¥toolbar>¥lock"    : "¥w:"+rrn(120)+"px;",
 			"body>¥toolbar>¥unlock"  : "¥w:"+rrn(120)+"px;",
-			"body>¥toolbar>¥bgi"     : "¥:block;¥w:"+rrn(300)+"px;¥h:"+rrn(30)+"px;",
-			"body>¥toolbar>¥prf"     : "¥:block;¥w:"+rrn(300)+"px;¥h:"+rrn(30)+"px;",
 			
 			});}
 	µ.ma(document.head,µ.m({type:"style",d:{"data-unique":dataUnique},css:css}));};
@@ -115,12 +113,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 	µ.rr(document.body,µ.m([[
 		["¥bg1"],
 		["¥innerBody"],
-		["¥toolbar",[
-			["¥bgi"],
-			["¥prf"],
-			µ.bscss("lock panels",[".button",{click:function(){panflo.aliveF = F;}}],"¥lock"),
-			µ.bscss("unlock panels",[".button",{click:function(){panflo.aliveF = T;}}],"¥unlock"),
-		]],
+		["¥toolbar",[]],
 	]]));
 	
 //	var t = 0; // top, because the interface is row-based
@@ -141,20 +134,27 @@ document.addEventListener("DOMContentLoaded",()=>{
 	p.shift("↑↑");
 	lAnchor = l;
 	var w = 300;
-	elKERNDimO["gameframe0" ] = {w    ,h:550};
-	elKERNDimO["score0"     ] = {w    ,h: 30};
-	elKERNDimO["hidePanels0"] = {w:w/2,h: 30};
-	elKERNDimO["showPanels0"] = {w:w/2,h: 30};
+	elKERNDimO["gameframe0"   ] = {w    ,h:550};
+	elKERNDimO["score0"       ] = {w    ,h: 30};
+	elKERNDimO["hidePanels0"  ] = {w:w/2,h: 30};
+	elKERNDimO["showPanels0"  ] = {w:w/2,h: 30};
+	elKERNDimO["unlockPanels0"] = {w:w/2,h: 30};
+	elKERNDimO["lockPanels0"  ] = {w:w/2,h: 30};
 	elKERNDimO.forEach(elKERNDim=>{elKERNDim.i = elKERNDim.h + p.handleH;});
-	/***/elKERNPreO[_="gameframe0" ] = {partID:"KERN000006",title:"gameframe"                 };p.preBuild();
+	/***/elKERNPreO[_="gameframe0"   ] = {partID:"KERN000006",title:"gameframe"                 };p.preBuild();
 	p.shift("↓");
 	p.shift("←←");
-	/***/elKERNPreO[_="score0"     ] = {partID:"KERN000014",title:"score"                     };p.preBuild();
+	/***/elKERNPreO[_="score0"       ] = {partID:"KERN000014",title:"score"                     };p.preBuild();
 	p.shift("↓");
 	p.shift("←←");
-	/***/elKERNPreO[_="hidePanels0"] = {partID:"KERN000016",title:"hide stuff [performance↑↑]",initial:[["labelS","hide stuff<br>[performance↑↑]"],["fxnEdgeHi",function(){p.panelHideAllFxn();}]]};p.preBuild();
+	/***/elKERNPreO[_="hidePanels0"  ] = {partID:"KERN000016",title:"hide stuff [performance↑↑]",initial:[["labelS","hide stuff<br>[performance↑↑]"],["fxnEdgeHi",function(){p.panelHideAllFxn();}]]};p.preBuild();
 	p.shift("→");
-	/***/elKERNPreO[_="showPanels0"] = {partID:"KERN000016",title:"show all panels"           ,initial:[["labelS","show all panels"],["fxnEdgeHi",function(){p.panelShowAllFxn();}]]};p.preBuild();
+	/***/elKERNPreO[_="showPanels0"  ] = {partID:"KERN000016",title:"show all panels"           ,initial:[["labelS","show all panels"],["fxnEdgeHi",function(){p.panelShowAllFxn();}]]};p.preBuild();
+	p.shift("↓");
+	p.shift("←←");
+	/***/elKERNPreO[_="lockPanels0"  ] = {partID:"KERN000016",title:"lock panels"               ,initial:[["labelS","lock panels"],["fxnEdgeHi",function(){panflo.aliveF = F;}]]};p.preBuild();
+	p.shift("→");
+	/***/elKERNPreO[_="unlockPanels0"] = {partID:"KERN000016",title:"unlock panels"             ,initial:[["labelS","unlock panels"],["fxnEdgeHi",function(){panflo.aliveF = T;}]]};p.preBuild();
 	
 	elKERNLinkA.push({from:"gameframe0",to:"score0"     ,portA:[[["noteInstantStatA"],["noteInstantStatA"]],[["hitC"],["hitC"]],[["holdC"],["holdC"]],[["passedHeadC"],["passedHeadC"]],[["passedTailC"],["passedTailC"]],[["scoreResetSignal"],["scoreResetSignal"]],[["earnedHeadC"],["earnedHeadC"]],[["earnedTailC"],["earnedTailC"]]]});
 	elKERNLinkA.push({from:"gameframe0",to:"chartAudio0",portA:[[["state"],["state"]],[["chartP"],["t"]],[["playbackRate"],["playbackRate"]],[["volume"],["volume"]]]});
@@ -168,9 +168,9 @@ document.addEventListener("DOMContentLoaded",()=>{
 	p.shift("↑↑");
 	lAnchor = l;
 	var h = 30;
-	elKERNDimO["globalTx0"   ] = {w: 50,h};
+	elKERNDimO["globalTx0"   ] = {w:100,h};
 	elKERNDimO["globalCo0"   ] = {w:150,h};
-	elKERNDimO["globalBg0"   ] = {w: 50,h};
+	elKERNDimO["globalBg0"   ] = {w:100,h};
 	elKERNDimO["prefLoad0"   ] = {w:150,h};
 	elKERNDimO["prefSave0"   ] = {w:100,h};
 	elKERNDimO["bgLoad0"     ] = {w:150,h};

@@ -158,7 +158,7 @@ var KERN = function(o={}){
 		inbound       : function(o={}){var startT = π.now();KERNll(KERNDebugIndentS.repeat(KERNDebugIndentLevel)+"v inbound "+this.base);KERNDebugIndentLevel++;
 			π.p(o,{datA:[],setupF:F});var _ = this.o;
 //			if (this.counter === 3){ll(π.jsonE(o));}
-			if (this.ID.indexOf("global") === 0){ll(this.ID+" inbound");}
+//			if (this.ID.indexOf("global") === 0){ll(this.ID+" inbound");}
 			
 			this.alteredPropertyP    .clear();
 			this.alteredPropertyFullP.clear();

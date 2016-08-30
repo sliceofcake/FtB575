@@ -32,7 +32,9 @@ var KERN000011 = {
 				// utilities
 			},
 			stabilize_SUB : function(){var _ = this.o;
-				if (this.if("which","location")){_.english = π.keySetToEnglish(_.which,_.location);}
+				if (this.if("which","location")){
+					//ll(_.which+" ... "+_.location+" ... "+_.english);
+					_.english = π.keySetToEnglish(_.which,_.location);}
 				//window.removeEventListener("keydown",_.keydown); // MDN claims this is not needed, redundancy is blocked when calling addEventListener
 				//window.removeEventListener("keyup"  ,_.keyup  ); // MDN claims this is not needed, redundancy is blocked when calling addEventListener
 				window.addEventListener("keydown",_.keydown);

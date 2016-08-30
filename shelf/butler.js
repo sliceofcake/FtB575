@@ -1042,6 +1042,7 @@ var π = {
 	flTx : function(){return this.loadFileAsText.apply(this,arguments);},
 	// much labor avoided thanks to http://www.cambiaresearch.com/articles/15/javascript-char-codes-key-codes
 	keySetToEnglish : function(charCode,location){
+		if (charCode <= 0 || location < 0){return "";}
 		tmp = "";
 		if (charCode == 8) tmp = "backspc"; //  backspace
 		else if (charCode == 9) tmp = "tab"; //  tab
