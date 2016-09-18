@@ -30,9 +30,9 @@ With the panel called something like "audio leeway", you can control how tightly
 [http://feelthebeats.se/575_2016_08_30_B/edit/](http://feelthebeats.se/575_2016_08_30_B/edit/)  
 
 **Where can I find charts?**  
-[link:http://osusearch.com/search/?statuses=Ranked&modes=Mania]  
-[link:https://osu.ppy.sh/p/beatmaplist?m=3&r=0]  
-[link:https://feelthebeats.se/gomi/ballroomoflostmemories.php]  
+[http://osusearch.com/search/?statuses=Ranked&modes=Mania](http://osusearch.com/search/?statuses=Ranked&modes=Mania)  
+[https://osu.ppy.sh/p/beatmaplist?m=3&r=0](https://osu.ppy.sh/p/beatmaplist?m=3&r=0)  
+[https://feelthebeats.se/gomi/ballroomoflostmemories.php](https://feelthebeats.se/gomi/ballroomoflostmemories.php)  
 
 **Remember that you can save FtB575 /edit/ and play offline, without internet connection.**  
 If you have FtB575 /edit/ loaded and you save it through your web browser [probably "File>Save Page As..."], you should be able to load it whenever you want and play it mostly without issues. /edit/ should be able to operate without server connectivity.  
