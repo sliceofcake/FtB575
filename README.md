@@ -24,7 +24,7 @@ With the panel called something like "audio leeway", you can control how tightly
 **Usage instructions:**  
 (1) Drag&drop your audio file to the panel that says something like "audio file" on the handle [aim for the dashed-line box that says "file" in the south-east corner].  
 (2) Drag&drop your chart file to the panel that says something like "chart file" on the handle [aim for the dashed-line box that says "file" in the south-east corner].  
-(3) Once you drag&dropped your chart file, the chart will automatically start. If you aren't ready, you can pause and/or reset the chart [see the grid of key bindings, pause is probably labeled "k lo" and reset is probably labeled "k reset"]. If you start typing and your key-inputs are going to the wrong place [like your browser's url bar], click anywhere within the FtB575 page to refocus.  
+(3) Once you've dragged&dropped your chart file, the chart will automatically start. If you aren't ready, you can pause and/or reset the chart [see the grid of key bindings, pause is probably labeled "k lo" and reset is probably labeled "k reset"]. If you start typing and your key-inputs are going to the wrong place [like your browser's url bar], click anywhere within the FtB575 page to refocus.  
 
 **Link[s]/URL[s] to this build:**  
 [http://feelthebeats.se/575_2016_08_30_B/edit/](http://feelthebeats.se/575_2016_08_30_B/edit/)  
