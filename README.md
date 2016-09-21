@@ -4,7 +4,7 @@ Version 575 of Online Rhythm Game, Feel the Beats
 Some Reminders Copy-Pasted From [The FtB5 /boards/ Dev News Subboard](https://feelthebeats.se/boards/?nyan=13):  
 
 **Use the newest version of the Google Chrome web browser.**  
-If you don't have Chrome, this link will probably take you to the official download page [https://www.google.com/chrome/browser/desktop/](https://www.google.com/chrome/browser/desktop/). "Why only Chrome?" : [http://feelthebeats.se/boards/?nyan=13&cat=432](http://feelthebeats.se/boards/?nyan=13&cat=432). The newest versions of Firefox are now somewhat compatible with FtB575. Safari is completely out of the question until Safari 10 is released.  
+If you don't have Chrome, this link will probably take you to the official download page [https://www.google.com/chrome/browser/desktop/](https://www.google.com/chrome/browser/desktop/). "Why only Chrome?" : [http://feelthebeats.se/boards/?nyan=13&cat=432](http://feelthebeats.se/boards/?nyan=13&cat=432). The newest versions of Firefox and Safari are now somewhat compatible with FtB575.  
 
 **Use a bogus password, if the build has server connectivity.**  
 Do not submit private/confidential information to FtB575. The system is not currently secure.  
