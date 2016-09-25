@@ -4,7 +4,7 @@ Version 575 of Online Rhythm Game, Feel the Beats
 Some Reminders Copy-Pasted From [The FtB5 /boards/ Dev News Subboard](https://feelthebeats.se/boards/?nyan=13):  
 
 **Use the newest version of the Google Chrome web browser.**  
-If you don't have Chrome, this link will probably take you to the official download page [https://www.google.com/chrome/browser/desktop/](https://www.google.com/chrome/browser/desktop/). "Why only Chrome?" : [http://feelthebeats.se/boards/?nyan=13&cat=432](http://feelthebeats.se/boards/?nyan=13&cat=432). The newest versions of Firefox and Safari are now somewhat compatible with FtB575.  
+If you don't have Chrome, this link will probably take you to the official download page [https://www.google.com/chrome/browser/desktop/](https://www.google.com/chrome/browser/desktop/). "Why only Chrome?" : [https://feelthebeats.se/boards/?nyan=13&cat=432](https://feelthebeats.se/boards/?nyan=13&cat=432). The newest versions of Firefox and Safari are now somewhat compatible with FtB575.  
 
 **Use a bogus password, if the build has server connectivity.**  
 Do not submit private/confidential information to FtB575. The system is not currently secure.  
@@ -27,7 +27,7 @@ With the panel called something like "audio leeway", you can control how tightly
 (3) Once you've dragged&dropped your chart file, the chart will automatically start. If you aren't ready, you can pause and/or reset the chart [see the grid of key bindings, pause is probably labeled "k lo" and reset is probably labeled "k reset"]. If you start typing and your key-inputs are going to the wrong place [like your browser's url bar], click anywhere within the FtB575 page to refocus.  
 
 **Link[s]/URL[s] to this build:**  
-[http://feelthebeats.se/575_2016_09_24/edit/](http://feelthebeats.se/575_2016_09_24/edit/)  
+[https://feelthebeats.se/575_2016_09_24/edit/](https://feelthebeats.se/575_2016_09_24/edit/)  
 
 **Where can I find charts?**  
 [http://osusearch.com/search/?statuses=Ranked&modes=Mania](http://osusearch.com/search/?statuses=Ranked&modes=Mania)  
