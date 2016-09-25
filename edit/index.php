@@ -376,7 +376,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 	/***/elKERNPreO[_="gfPostSepH0"      ] = {partID:"KERN000005",title:"post-sep height",initial:[["value",      4      ],["dirAsc","E"],["ascRoot",0],["min",      0    ],["max",     20    ],["snap",     1      ],["ascMode","additive"],["valueFxn",v=>v+"px"]]};p.preBuild();
 	p.shift("↓");
 	p.shift("←←");
-	/***/elKERNPreO[_="gfNoteDelay0"     ] = {partID:"KERN000005",title:"note delay"     ,initial:[["value",      0      ],["dirAsc","E"],["ascRoot",0],["min",-500000    ],["max", 500000    ],["snap",  1000      ],["ascMode","additive"],["valueFxn",v=>(v/1000)+"ms"]]};p.preBuild();
+	/***/elKERNPreO[_="gfNoteDelay0"     ] = {partID:"KERN000005",title:"note delay"     ,initial:[["value",      0      ],["dirAsc","E"],["ascRoot",0],["min",-1000000   ],["max", 500000    ],["snap",  1000      ],["ascMode","additive"],["valueFxn",v=>(v/1000)+"ms"]]};p.preBuild();
 	p.shift("→");
 	/***/elKERNPreO[_="gfScrollSpeed0"   ] = {partID:"KERN000005",title:"scroll speed"   ,initial:[["value",      0.00055],["dirAsc","E"],["ascRoot",0],["min",     -0.002],["max",      0.002],["snap",     0.00005],["ascMode","additive"],["valueFxn",(v,c)=>(c===0?(v*1000):(v*1000).toPrecision(c))+"x"]]};p.preBuild();
 	

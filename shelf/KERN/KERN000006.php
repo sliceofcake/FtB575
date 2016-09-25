@@ -178,14 +178,38 @@ var KERN000006 = {
 				renderRegister       : function(){for (var argument of arguments){this.renderRegisterA.pushUnique(argument);}},
 				chartTxtDecode : function(res){
 					var box = {bpmA:[],noteA:[],keyC:0};
-					var type = (res.match(/\[HitObjects\]/)===null)?"FtB4":"o!m14";
+					var type = "FtB4";
+					if      (res.match(/\[HitObjects\]/) !== N){type = "o!m14";}
+					else if (res.match(/HEADER\sFIELD/ ) !== N){type = "bms"  ;}
+					else                                       {type = "FtB4" ;}
+					
 					switch (type){default:
+						// !!! the following is only for BME, and does not yet have handling to determine "yes, this file is BME, not any of those other file types"
+						break;case "bms":case "bme":case "bml":case "pms":
+							var kO = {11:1,12:2,13:3,14:4,15:5,18:6,19:7,16:8};
+							var kKA = Object.keys(kO);
+							box.keyC = 8;
+							// bpm
+							res.replace(/^#BPM\s(\-?\d+(?:\.\d+)?)$/gm,function(match,p1,offset,string){box.bpmA.push({head:0,value:num(p1)});return "";});
+							// hit
+							res.replace(/^#(.{3})(.{2}):((?:.{2})+)$/gm,function(match,p1,p2,p3,offset,string){
+								if (!kKA.includes(p2)){return "";}
+								var bpm = box.bpmA[0].value; // !!! temporary, need to account for bpm changes
+								var codeA = p3.match(/.{2}/g);
+								var codeAC = codeA.length;
+								codeA.forEach((code,codeAI)=>{
+									if (code==="00"){return;}
+									var expandN = codeAI/codeAC;
+									box.noteA.push({head:(240000000/bpm)*(int(p1)+expandN),lane:int(kO[p2])});});
+								return "";});
+							// hold
+							//res.replace(/^(\-?\d+(?:\.\d+)?)\-(\-?\d+(?:\.\d+)?)\s\d+\s(\d+)$/gm,function(match,p1,p2,p3,offset,string){box.noteA.push({head:π.chop(num(p1)*1000),tail:π.chop(num(p2)*1000),lane:int(p3)});return "";});
 						break;case "o!m12":case "o!m13":case "o!m14":
 							// notes
 							// holds have exactly one more colon pair than hits
 							// hits and holds may end with the name of an audio file, such as "F6S_s.wav", after the trailing colon
 							//----
-							box.keyC = ((_=res.match(/CircleSize\s*:\s*(\d+)/))===null)?0:int(_[1]);
+							box.keyC = ((_=res.match(/CircleSize\s*:\s*(\d+)/))===N)?0:int(_[1]);
 							// bpm
 							res.replace(/^(\-?\d+(?:\.\d+)?),(\-?\d+(?:\.\d+)?),(\-?\d+(?:\.\d+)?),(\-?\d+(?:\.\d+)?),(\-?\d+(?:\.\d+)?),(\-?\d+(?:\.\d+)?),(\-?\d+(?:\.\d+)?),(\-?\d+(?:\.\d+)?)$/gm,function(match,p1,p2,p3,p4,p5,p6,p7,p8,offset,string){box.bpmA.push({head:π.chop(num(p1)*1000),value:((num(p2)===0)?(0):(60000/num(p2)))});return "";});
 							// hit
