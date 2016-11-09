@@ -7,6 +7,7 @@
 * list of frequently used shorthands
 * a   : array
 * d   : data
+* e   : entity [historically "event", the new style is to just name that "event", spelled out all the way]
 * el  : element [in HTML] [when more details given : elExtraInformationAfter]
 * fxn : function
 * hi  : high, to match the same character count as an shortening of "low", the opposite of high
@@ -15,9 +16,9 @@
 * lo  : low, to match the same character count as an shortening of "high", the opposite of low
 * m   : mystery, a parameter to a function when you have absolutely no idea what it will be
 * n   : number, a parameter to a function
-* o   : object [also known as a dictionary]
+* o   : object [also known as a dictionary], often used to denote the arguments object directly passed to a function [therefore took the place of the historical "p" for "parameter[s]"]
 * out : [usually] string, as a result and/or output
-* p   : parameter [also, the "personal" object is given this global-scope single-letter variable name]
+* p   : the "personal" object is given this global-scope single-letter variable name. historically meant "parameter". can confusingly be the "prev" of [].reduce((p,v,i,a)=>{})
 * q   : query
 * res : [usually] not string, as a result and/or output
 * r   : an object, as the focus of a loop iteration [largely with tabular data]
@@ -33,7 +34,7 @@
 * B
 * C   : count, of array or object
 * D
-* E
+* E   : Entity, similar to Mystery, but used when more is known. Example: instead of a plushieA, we might have a plushieEA, because plushieEA looks like [["plushie"=>"hello"],["plushie"=>"world"]]. Use E when you don't have a good name for the entity
 * F   : flag
 * Fxn : function
 * G
@@ -41,7 +42,7 @@
 * I   : iterator, use with arrays, not with objects (use "K" for object iterator "k"eys)
 * J
 * K   : key as in a key-value pair
-* L
+* L   : co[L]lection, like an array, but not, such as element.children
 * M
 * N   : number
 * O   : object [key-value]
@@ -82,19 +83,20 @@ const F = false;
 const N = null;
 const U = undefined;
 
-function int(m,fallback=NaN){var _ = parseInt(m);return (Number.isNaN(_)) ? fallback : _;}
+// cannot pass undefined with default parameters, so it gets its own override flag
+function int(m,fallback=NaN,undefinedF=F){var _ = parseInt(m);return (Number.isNaN(_)) ? (undefinedF?undefined:fallback) : _;}
 function str(m){return m.toString();}
-function num(m){return parseFloat(m);}
+function num(m,fallback=NaN,undefinedF=F){var _ = parseFloat(m);return (Number.isNaN(_)) ? (undefinedF?undefined:fallback) : _;}
 function isI(m){return Number.isInteger(m);}
-function isN(m){return (typeof m === "number");}
+function isN(m){return (typeof m === "number");} // this is for testing Numeric. Numeric beat out Null because Null can be simply, directly tested and Numeric cannot
 function isNaN(m){return Number.isNaN(m);}
 function isS(m){return (typeof m === "string");}
 function isF(m){return (m === true || m === false);}
-function isN(m){return (m === null);}
-function isU(m){return (typeof m === "undefined");} // only useful for leaf nodes
+function isU(m){return (typeof m === "undefined");}
 function isA(m){return Array.isArray(m);}
 function isO(m){return typeof m === "object" && m !== N && !isA(m);}
 function isNumStr(m){return (typeof m === "string" && str(int(m)) === m);};
+function isFxn(m){return (typeof m === "function");}
 
 var Ω = {
 	mousedownF  : F,
@@ -192,7 +194,11 @@ var µ = {
 	tg:function(el,showState){
 		if (el === null){return;}
 		if (typeof showState === "undefined"){showState = "block";}
-		el.style.display = (getComputedStyle(el).display===showState)?"none":showState;},
+		// getComputedStyle causes a larger performance hit, so only resort to it if we absolute have to
+		if (el.style.display === ""){
+			el.style.display = (getComputedStyle(el).display===showState)?"none":showState;}
+		else{
+			el.style.display = (el.style.display===showState)?"none":showState;}},
 	// element immediate children, without weird bugs
 	// !!! 2 Aug 2016 ~ discovered to be significantly slower [10x~100x slower] than the non-array .children alternative for document.head with ~300 children
 	ic:function(el){
@@ -236,7 +242,7 @@ var µ = {
 			o.type = s;}
 		return o;},
 	// element macro
-	m:function(o,elP=null){
+	m:function(o,qReplFxnA=[]){
 		if (o === null){return o;}
 		if (typeof o                 === "undefined"){o = {};} // default to long mode
 		// short mode, translates to long mode
@@ -244,32 +250,40 @@ var µ = {
 			var oo = {};
 			// [query:""]
 			if (o.length === 1 && typeof o[0] === "string"){
-				oo = this.qcnv(o[0]);}
+				var o0 = o[0];qReplFxnA.forEach(qReplFxn=>{o0 = qReplFxn(o0);});
+				oo = this.qcnv(o0);}
 			// [childA:[]]
 			else if (o.length === 1 && typeof o[0] === "object" && isA(o[0])){
+				var o0 = "";qReplFxnA.forEach(qReplFxn=>{o0 = qReplFxn(o0);}); // this is needed for qReplFxns that add to a possibly blank q
+				oo = this.qcnv(o0);
 				oo.childA = o[0];}
 			// [query:"",html:""]
 			else if (o.length === 2 && typeof o[0] === "string" && (typeof o[1] === "string" || typeof o[1] === "number")){
-				oo = this.qcnv(o[0]);
+				var o0 = o[0];qReplFxnA.forEach(qReplFxn=>{o0 = qReplFxn(o0);});
+				oo = this.qcnv(o0);
 				oo.html = (typeof o[1] === "number") ? o[1].toString() : o[1];}
 			// [query:"",listenerO+z:{},html:""]
 			else if (o.length === 3 && typeof o[0] === "string" && typeof o[1] === "object" && !isA(o[1]) && (typeof o[2] === "string" || typeof o[2] === "number")){
-				oo = this.qcnv(o[0]);
+				var o0 = o[0];qReplFxnA.forEach(qReplFxn=>{o0 = qReplFxn(o0);});
+				oo = this.qcnv(o0);
 				oo.listenerO = o[1];//π.cc(o[1]);
 				if (typeof o[1].z !== "undefined"){oo.z = o[1].z;delete oo.listenerO.z;}
 				oo.html = (typeof o[2] === "number") ? o[2].toString() : o[2];}
 			// [query:"",childA:[]]
 			else if (o.length === 2 && typeof o[0] === "string" && typeof o[1] === "object" && isA(o[1])){
-				oo = this.qcnv(o[0]);
+				var o0 = o[0];qReplFxnA.forEach(qReplFxn=>{o0 = qReplFxn(o0);});
+				oo = this.qcnv(o0);
 				oo.childA = o[1];}
 			// [query:"",listenerO+z:{}]
 			else if (o.length === 2 && typeof o[0] === "string" && typeof o[1] === "object" && !isA(o[1])){
-				oo = this.qcnv(o[0]);
+				var o0 = o[0];qReplFxnA.forEach(qReplFxn=>{o0 = qReplFxn(o0);});
+				oo = this.qcnv(o0);
 				oo.listenerO = o[1];//π.cc(o[1]);
 				if (typeof o[1].z !== "undefined"){oo.z = o[1].z;delete oo.listenerO.z;}}
 			// [query:"",listenerO+z:{},childA:[]]
 			else if (o.length === 3 && typeof o[0] === "string" && typeof o[1] === "object" && !isA(o[1]) && typeof o[2] === "object" && isA(o[2])){
-				oo = this.qcnv(o[0]);
+				var o0 = o[0];qReplFxnA.forEach(qReplFxn=>{o0 = qReplFxn(o0);});
+				oo = this.qcnv(o0);
 				oo.listenerO = o[1];//π.cc(o[1]);
 				if (typeof o[1].z !== "undefined"){oo.z = o[1].z;delete oo.listenerO.z;}
 				oo.childA = o[2];}
@@ -340,7 +354,7 @@ var µ = {
 		// recurse for children
 		for (var i = 0; i < o.childA.length; i++){var v = o.childA[i];
 			//this.ma(el,this.m(v)); // I think this is unnecessary [00:50] 17 Jan 2016
-			var elInner = this.m(v,el);
+			var elInner = this.m(v,qReplFxnA);
 			if (elInner !== null){el.appendChild(elInner);}}
 		return el;},
 	cssCompile:function(cssO){
@@ -477,10 +491,13 @@ var µ = {
 			});
 		});
 		µ.ma(document.head,µ.m({type:"style",d:{"data-unique":dataUnique},css}));},*/
+	cssO:function(cssO){
+		return cssO.mapO((v,i)=>({[i]:this.css(v)}));},
 	// css shorthand translate
 	css:function(s){
 		var cssTranslateCallbackZero = function(m,p1){
 			switch (p1){
+				case "reset"       :return "all:initial;";
 				case "absolute"    :return "position:absolute;";
 				case "relative"    :return "position:relative;";
 				case "fixed"       :return "position:fixed;";
@@ -683,7 +700,9 @@ var π = {
 	cc_OLD:function(m){return (typeof m === "object" && m !== null) ? m.map(v=>this.cc(v)) : m;},
 	// quick attempt, again [deep copy]
 	cc:function(m){
-		if (typeof m === "object"){
+		if (m instanceof File){
+			return m;}
+		else if (typeof m === "object"){
 			if (m === null){return m;}
 			if (Array.isArray(m)){
 				var res = new Array(m.length);
@@ -696,7 +715,7 @@ var π = {
 				for (var i = 0; i < keyA.length; i++){var k = keyA[i];
 					res[k] = π.cc(m[k]);}
 				return res;}}
-		return m;},
+		else{return m;}},
 	// quick, minimal carbon copy
 	// !!! was incorrectly handling dictionary attributes, and was not faster than π.cc
 	/*ccm:function(m){
@@ -747,6 +766,7 @@ var π = {
 		||  m === ""
 		||  m === "0"
 		||  m === "not sure"
+		||  m === "uncertain"
 		||  m === "dunno"
 		||  m === "idk"
 		||  m === "uhh"
@@ -870,6 +890,7 @@ var π = {
 		return Math.floor(Math.random()*((high+1)-low)+low);},
 	// run immediately, and set up setInterval
 	intervalCall:function(t,fxn){fxn();return setInterval(fxn,t/1000);},
+	intervalClear:function(intervalHandle){clearInterval(intervalHandle);},
 	// CSS reduction ratio, multiply this by lengths to get adjusted length for screen size
 	reductionRatio:function(baseW,baseH){
 		return Math.pow(Math.min(window.innerWidth/baseH,window.innerHeight/baseW),1/3);},
@@ -1254,11 +1275,24 @@ var π = {
 		var dotPos = s.indexOf(".");
 		if (dotPos === -1){return 0;}
 		return s.substr(dotPos+1).length;},
+	IDToBlockString:function(n){
+		if (!isI(n)){return U;}
+		if (n < 0 || n > Number.MAX_SAFE_INTEGER){return U;}
+		var sA = ["　","▝","▗","▖","▘","▐","▄","▌","▀","▞","▚","▟","▙","▛","▜","█"];
+		var base = sA.length;
+		var res = "";
+		do{
+			var rem = n % base;
+			res = sA[rem]+res;
+			n = (n-rem)/base;
+		}while(n !== 0);
+		return res;},
 	
 };
 
 // they told me not to, but I did it anyway
 Array.prototype.pushUnique = function(el){if (!this.includes(el)){this.push(el);}};
+Array.prototype.pushUniqueA = function(elA){elA.forEach(el=>{this.pushUnique(el);});}; // !!! make this faster
 Array.prototype.sum = function(){return this.reduce(((p,v)=>p+v),0);};
 Array.prototype.reduceSum = function(fxn=()=>T){return this.reduce((p,v,i,a)=>p+(fxn(v,i,a)?1:0),0);};
 Array.prototype.min = function(init){return this.length===0 ? init : this.reduce(((p,v)=>p>v?v:p));};
@@ -1277,6 +1311,12 @@ Array.prototype.map = function(fxn){
 	var length = this.length;
 	for (var i = 0; i < length; i++){
 		res[i] = fxn(this[i],i,this);}
+	return res;};
+Array.prototype.mapReverse = function(fxn){
+	var res = new Array(this.length);
+	var length = this.length;
+	for (var i = 0; i < length; i++){
+		res[i] = fxn(this[((length-1)-i)],((length-1)-i),this);}
 	return res;};
 Array.prototype.reduce = function(fxn,accumulator){
 	var length = this.length;
@@ -1373,6 +1413,14 @@ Object.values = function(o){
 	for (var k of Object.keys(o)){
 		a.push(o[k]);}
 	return a;};
+Array.prototype.findRandom = function(fxn){
+	var thisC = this.length;
+	if (thisC === 0){return undefined;}
+	return this[Math.floor(Math.random()*thisC)];};
+Array.prototype.findIndexRandom = function(fxn){
+	var thisC = this.length;
+	if (thisC === 0){return -1;}
+	return Math.floor(Math.random()*thisC);};
 Object.prototype.mapK = function(fxn){return Object.keys  (this.map(fxn));};
 Object.prototype.mapV = function(fxn){return Object.values(this.map(fxn));};
 Object.prototype.mapO = function(fxn){ // fxn returns {key:value} instead of just value as in the traditional map
@@ -1436,6 +1484,16 @@ Object.prototype.findIndex = function(fxn){
 		if (fxn(this[k],k,this)){
 			return k;}}
 	return -1;};
+Object.prototype.findRandom = function(fxn){
+	var keyA = Object.keys(this);
+	var keyAC = keyA.length;
+	if (keyAC === 0){return undefined;}
+	return this[keyA[Math.floor(Math.random()*keyAC)]];};
+Object.prototype.findIndexRandom = function(fxn){
+	var keyA = Object.keys(this);
+	var keyAC = keyA.length;
+	if (keyAC === 0){return -1;}
+	return keyA[Math.floor(Math.random()*keyAC)];};
 String.prototype.forEach = function(fxn){
 	for (var i = 0; i < this.length; i++){
 		fxn(this[i],i,this);}};
@@ -1617,6 +1675,7 @@ document.addEventListener("DOMContentLoaded",function(){
 * 
 * Warning : This may make secretly assume that certain properties of your elements are set, such as display:absolute.
 *           These should eventually be worked out, but until they are, bear this in mind if things "don't work".
+*           top,left,width,height,zIndex
 * 
 \**********************************************************************************************************************/
 
@@ -1756,7 +1815,7 @@ var panflo = {
 			if (row.PANFLO.grabbed || row.PANFLO.grabbedResize){event.stopPropagation();}
 			row.PANFLO.grabbed = false;
 			row.PANFLO.grabbedResize = false;}},
-	bringFront : function(el){el.style.zIndex = µ.qdA(".layer").map(el=>int(getComputedStyle(el).getPropertyValue("z-index"))).max(1)+1;},
+	bringFront : function(el){el.style.zIndex = µ.qdA(".panel").map(el=>int(getComputedStyle(el).getPropertyValue("z-index"))).max(1)+1;},
 };
 document.addEventListener("DOMContentLoaded",function(){
 	document.addEventListener("mousedown",function(e){panflo.mousedown(e);});

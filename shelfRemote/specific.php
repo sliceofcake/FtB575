@@ -7,36 +7,140 @@ require_once("mysql.php");
 // DATABASE-SPECIFIC TO FTB7
 // query UPDATE
 function D_qu($tbl,$ID,$arr){
-	if (!in_array($tbl,DB_TABLE_ARR(),TRUE)){ERR_M_SET("invalid table:".strval($tbl)." passed to D_qu()");return FALSE;}
-	if (!is_int($ID)){ERR_M_SET("invalid ID:".strval($ID)." passed to D_qu()");return FALSE;}
-	if (!is_array($arr) || count($arr) === 0){ERR_M_SET("invalid arr:".strval($paramArr)." passed to D_qu()");return FALSE;}
-	query("UPDATE ftb7_".$tbl." SET ".implode(",",π_map($arr,function($v,$i){return "`".$i."`='".esc($v)."'";}))." WHERE ID='".esc($ID)."' LIMIT 1");}
+	if (!in_array($tbl,DB_TABLE_ARR(),T)){SET_RETURN_MSG("invalid table:".str($tbl)." passed to D_qu()");return F;}
+	if (!isI($ID)){SET_RETURN_MSG("invalid ID:".str($ID)." passed to D_qu()");return F;}
+	if (!isA($arr)){SET_RETURN_MSG("invalid arr:".str($paramArr)." passed to D_qu()");return F;}
+	π_aaa($arr,["t1"=>π_now()]);
+	$partSA = [];
+	foreach ($arr as $k=>$v){
+		if (isBoringS($k)){
+			$partSA[] = "`".$k."`='".esc($v)."'";}}
+	// this gate will always return T, but keep it here just in case this code changes in the future, allowing $partSA to be an empty array at this step
+	if (count($partSA) > 0){
+		$queryS = "UPDATE `".$tbl."` SET ".implode(",",$partSA)." WHERE ID='".esc($ID)."' LIMIT 1";}
+	$q = db_q($queryS);if ($q === F){SET_RETURN_MSG("query failed in D_qu() : ".queryErrorDescription()." : ".$queryS);return F;}
+	return T;}
+function D_qi($tbl,$arr){
+	if (!in_array($tbl,DB_TABLE_ARR(),T)){SET_RETURN_MSG("invalid table:".str($tbl)." passed to D_qu()");return F;}
+	if (!isA($arr)){SET_RETURN_MSG("invalid arr:".str($paramArr)." passed to D_qu()");return F;}
+	$ID = K_genID($tbl);
+	$t = π_now();
+	π_aaa($arr,["ID"=>$ID,"t0"=>$t,"t1"=>$t]);
+	$kSA = [];
+	$vSA = [];
+	foreach ($arr as $k=>$v){
+		if (isBoringS($k)){
+			$kSA[] = "`".$k."`";
+			$vSA[] = "'".esc($v)."'";}}
+	if (count($kSA) === 0){SET_RETURN_MSG("failure in D_qi() : empty property collection");return F;}
+	$queryS = "INSERT INTO ".$tbl." (".implode(",",$kSA).") VALUES (".implode(",",$vSA).")";
+	$q = db_q($queryS);if ($q === F){SET_RETURN_MSG("query failed in D_qi() : ".db_errInfo()." : ".$queryS);return F;}
+	return $ID;}
+function D_qd($tbl,$ID){
+	if (!in_array($tbl,DB_TABLE_ARR(),T)){SET_RETURN_MSG("invalid table:".str($tbl)." passed to D_qu()");return F;}
+	if (!isI($ID)){SET_RETURN_MSG("invalid ID:".str($ID)." passed to D_qu()");return F;}
+	db_q("DELETE FROM ".$tbl." WHERE ID='".esc($ID)."' LIMIT 1");}
 // query SELECT COUNT(*)
 function D_qc($tbl,$fragment){
-	if (!in_array($tbl,DB_TABLE_ARR(),TRUE)){ERR_M_SET("invalid table:".strval($tbl)." passed to D_qu()");return FALSE;}
-	return queryresult("SELECT COUNT(*) FROM ftb7_".$tbl." WHERE ".$fragment);}
-// query SELECT *
-function D_qs($tbl,$ID){
-	$qrra = queryresultrowarray("SELECT * FROM ftb7_".$tbl." WHERE ID='".esc($ID)."' LIMIT 1");
-	return ($qrra === FALSE || count($qrra) === 0) ? FALSE : $qrra[0];}
-// extract relational IDs
-function D_exrel($tbl,$ID,$tblRel,$tblVia=NULL){
-	if ($tblVia === NULL){
-		return queryresultarray("SELECT DISTINCT(ID) FROM ftb7_".$tblRel." WHERE ".$tbl."ID='".esc($ID)."' ORDER BY ID ASC");}
+	if (!in_array($tbl,DB_TABLE_ARR(),T)){SET_RETURN_MSG("invalid table:".str($tbl)." passed to D_qu()");return F;}
+	return queryresult("SELECT COUNT(*) FROM ".$tbl." WHERE ".$fragment);}
+// query SELECT * FROM tbl matching ID
+function D_qs($tbl,$ID,$exrelA=[],$readLock=F){
+	if (!isI($ID)||$ID<1){return F;}
+	$qrra = db_qrra("SELECT * FROM ".$tbl." WHERE ID='".esc($ID)."' LIMIT 1".($readLock?" FOR UPDATE":""));
+	if ($qrra === F || count($qrra) === 0){
+		return F;}
 	else{
-		return queryresultarray("SELECT DISTINCT(ID) FROM ftb7_".$tblVia." WHERE ".$tbl."ID='".esc($ID)."' ORDER BY ID ASC");}}
-// rowexists
-function D_re($tbl,$ID){return rowexists("FROM ftb7_".$tbl." WHERE ID='".esc($ID)."'");}
-// query
-function D_q($q){return query($q);}
-// queryresult
-function D_qr($q){return queryresult($q);}
-// queryresultarray
-function D_qra($q){return queryresultarray($q);}
-// queryresultrowarray
-function D_qrra($q){return queryresultrowarray($q);}
+		rowReturnFilter($tbl,$qrra[0],$exrelA,F);
+		return $qrra[0];}}
+// query SELECT * FROM tbl matching IDA
+function D_qsA($tbl,$IDA,$exrelA,$readLock=F){
+	$IDA = π_filter($IDA,function($v){return isI($v)&&$v>=1;});
+	if (count($IDA) === 0){return [];}
+	$qrra = db_qrra("SELECT * FROM ".$tbl." WHERE ID IN (".implode(",",π_map($IDA,function($v){return "'".esc($v)."'";})).")".($readLock?" FOR UPDATE":""));
+	if ($qrra === F || count($qrra) === 0){
+		return F;}
+	else{
+		π_forEach($qrra,function(&$row)use($tbl,$exrelA,$IDA){rowReturnFilter($tbl,$row,$exrelA,count($IDA)>=1);});
+		return $qrra;}}
+// performs basic post-processing on a row NOT having to do with permissions
+function rowReturnFilter($tbl,&$row,$exrelA,$multiGrab=F){
+	// • add relation fields
+	// • likely expiration tagging
+	$t = π_now();
+	switch ($tbl){default:
+		break;case "channel":
+			if (in_array("message"    ,$exrelA,T)){$row["messageIDA"    ] = D_exrel($tbl,$row["ID"],"message"    );}
+			if (in_array("participant",$exrelA,T)){$row["participantIDA"] = D_exrel($tbl,$row["ID"],"participant");}
+		break;case "message":
+		break;case "participant":
+		break;case "plushie":
+			unset($row["hash"]);
+		break;case "user":
+			if (in_array("message"    ,$exrelA,T)){$row["messageIDA"    ] = D_exrel($tbl,$row["ID"],"message"    );}
+			if (in_array("participant",$exrelA,T)){$row["participantIDA"] = D_exrel($tbl,$row["ID"],"participant");}
+			if (in_array("plushie"    ,$exrelA,T)){$row["plushieIDA"    ] = D_exrel($tbl,$row["ID"],"plushie"    );}}
+	$row["_tStale"] = int(min($t + INTERVAL_RARE(),($t + ($t - $row["t1"])/2)));}
+
+// extract relational IDs
+function D_exrel($tbl,$ID,$tblRel){
+	return db_qra("SELECT DISTINCT(ID) FROM ".$tblRel." WHERE ".$tbl."ID='".esc($ID)."' ORDER BY ID ASC");}
+
+
+
+function ll($m,$level=0){db_q("INSERT INTO debug (lvl,msg,t) VALUES ('".esc($level)."','".esc(π_jsonE($m))."','".esc(π_now())."')");}
+
+function generateBgPath($userID){global $EXTERNAL_BGS_GATE_PATH;
+	return $EXTERNAL_BGS_GATE_PATH."?userID=".$userID;}
+
+
+function DBM_genPlushie(){
+	$charSet = array(
+		"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z",
+		"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z",
+		"0","1","2","3","4","5","6","7","8","9");
+	$charSetC = count($charSet);
+	$plu = "";for ($_ = 0; $_ < 60; $_++){$plu .= $charSet[random_int(0,$charSetC-1)];}
+	return $plu;}
+
+function DBM_UID(){
+	if (!isset($GLOBALS["userID"])){return 0;}
+	if (!isI($GLOBALS["userID"])){return 0;}
+	if ($GLOBALS["userID"] < 1){return 0;}
+	return $GLOBALS["userID"];}
+// is current user signed in with a valid userID? [Signed-In User]
+// [e] yes
+// [r] status
+function DBM_SIU(){
+	$res = (DBM_UID() >= 1);
+	if (!$res){SET_RETURN_MSG("anonymous");return F;}
+	return $res;}
+// does ID exist in table?
+function DBM_validID($tbl,$ID){
+	if (!is_string($tbl)){return FALSE;}
+	if (!is_int($ID)){return FALSE;}
+	return rowexists("FROM ".$tbl." WHERE ID='".esc($ID)."'");}
+// does current user own this row?
+function DBM_rowCLR($tbl,$ID){
+	if ($table == "mail"){
+		return rowexists("FROM ".$tbl." WHERE ID ='".esc($ID)."' AND userID_target='".esc(DBM_UID())."'");}
+	else{
+		return rowexists("FROM ".$tbl." WHERE ID ='".esc($ID)."' AND userID='".esc(DBM_UID())."'");}}
+
+
+
+
+
 //----------------------------------------------------------------------------------------------------------------------
 // K
+// expects $tbl to be cleaned/valid
+function K_genID($tbl){
+	do{$ID = π_rand(DB_ID_MIN(),DB_ID_MAX());}
+	while($ID<=99999 || db_rowExists("FROM ".$tbl." WHERE ID='".esc($ID)."'"));
+	return $ID;}
+
+
+
 function K_signedIn(){return (K_GID() !== FALSE);}
 function K_gstID(){
 	if (!isset($GLOBALS["userID"])){return FALSE;}
@@ -86,14 +190,6 @@ function K_getIP2(){
 	else if (isset($_SERVER["HTTP_FORWARDED"      ]) && $_SERVER["HTTP_FORWARDED"      ]){$ipaddress = $_SERVER["HTTP_FORWARDED"];}
 	else                                                                                 {$ipaddress = "UNKNOWN";}
 	return $ipaddress;}
-function K_adjectiveArr(){return array("Dubious","Dastardly","Fantastic","Confusing","Misunderstood","Limited Edition","Upgraded","CG","Unrivaled","Relocated","Offshore","Akiba","Angry","Forgotten","Infamous","Sparkling","After-School","Poorly-Hidden","Sekrit","Embarrassing","World-Famous","Saucy","Unlimited","Brilliant","Pre-Ordered","Over-Hyped","Wondrous","Shiny","Distracting","Discontinued","Underground","Evanescent","Shocking","Bankrupt","Overdue","Tsundere");}
-function K_animalArr(){return array("Penguin","Cat","Turtle","Giraffe","Lion","Polar Bear","Dolphin","Elephant","Dog","Lamb","Sheep","Budgie","Bunny","Rabbit","Tea","Grizzly Bear","Koi","Hippo","Llama","Alpaca","Amagi","Hen","Rooster","Horse","Trout","Rhinoceros","Squirrel","Seal");}
-function K_nounArr(){return array("Planetarium","Debate","Forest","Island","Doujinshi","Meteor","Software","Database","Museum","Maid Café","Bite","Detective","Hideout","Time","Cosplay","Novel","Sticker Book","Arcade Game","Park","Headquarters","Guild","Magazine","Manor","Shrine","Pond","Reef","Mountain","Jungle","Onsen","Paradise","Oasis","Dystopia","Collection","Pillow","Blanket","Box","Plot","Sticker","Party","Tower","Monument","Airlift","Airdrop");}
-function K_genChannelName(){
-	$adjective = K_adjectiveArr()[random_int(0,count(K_adjectiveArr())-1)];
-	$animal    = K_animalArr()   [random_int(0,count(K_animalArr()   )-1)];
-	$noun      = K_nounArr()     [random_int(0,count(K_nounArr()     )-1)];
-	return $adjective." ".$animal." ".$noun;}
 // in bytes. negative integer on error
 function K_retrieveFileSize($url){
 	$ch = curl_init($url);

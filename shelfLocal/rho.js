@@ -25,6 +25,7 @@ var core = {
 	patientTimeoutA   : [] ,
 	pqueue            : [] ,
 	plu               : "" ,
+	who               :  0 ,
 	// ask to queue up a command (no guarantees)
 	send:function(m){
 		var arg = (typeof m !== "undefined" && Array.isArray(m)) ? m : arguments;
@@ -33,13 +34,14 @@ var core = {
 			if (typeof p.tbl     === "undefined" || p.tbl     === null){p.tbl     = "" ;}
 			if (typeof p.act     === "undefined" || p.act     === null){p.act     = "" ;}
 			if (typeof p.dat     === "undefined" || p.dat     === null){p.dat     = {} ;}
-			if (typeof p.fln     === "undefined" || p.fln     === null){p.fln     = {} ;}
-			if (typeof p.fil     === "undefined" || p.fil     === null){p.fil     = {} ;}
+			if (typeof p.fln     === "undefined" || p.fln     === null){p.fln     = [] ;}
+			if (typeof p.fil     === "undefined" || p.fil     === null){p.fil     = [] ;}
 			if (typeof p.prc     === "undefined" || p.prc     === null){p.prc     = "" ;}
 			if (typeof p.patient === "undefined" || p.patient === null){p.patient = 100000;}
 			//if (p.prc != "custom"){return;} // temporary fail-fast
 			p.ntq = this.ntq;
 			p.req = this.req++;
+			p.who = this.who;
 			p.plu = this.plu;
 			if (this.pqueue.length >= this.COMMAND_QUEUE_MAX_SIZE){return false;} // fail-fast : queue full
 			this.pqueue.push(p);

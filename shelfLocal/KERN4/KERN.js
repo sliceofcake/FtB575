@@ -22,14 +22,20 @@ var KERN;
 	KERN = {
 		// programmer configuration variables
 		pcv : {
-			elInnerAttributeVFxn : root=>root.name+"_"+root.counter, // how you want to generate a unique element ID, given the root object of the element
-			elInnerAttributeK    : "data-type", // the element that gets placed in elP will, in HTML/DOM, be tagged with this key and elIDGeneratorFxn() as the value
-			elCSSAttributeK      : "data-unique",
-			genCSSVarS           : function(o={}){
-				var tx = (typeof o.tx === "undefined") ? [0,0,0  ] : o.tx;
-				var co = (typeof o.co === "undefined") ? [0,0,0  ] : o.co;
-				var bg = (typeof o.bg === "undefined") ? [0,0,0,1] : o.bg;
-				return "";},
+			// all sub-elements of the part type, such as "TEST000001"
+			elAttributeK_ofPartType    : "data-kern-of-part-type",
+			elAttributeVFxn_ofPartType : root=>root.name,
+			// all sub-elements of the class, such as "aac"
+			elAttributeK_ofUnique      : "data-kern-of-unique",
+			// all sub-elements of the instance, such as "4"
+			elAttributeK_ofInstance    : "data-kern-of-instance",
+			elAttributeVFxn_ofInstance : root=>root.counter,
+			// the CSS element for the part type
+			elCSSMultiAttributeK     : "data-kern-unique",
+			elCSSMultiAttributeVFxn  : root=>root.name,
+			// the CSS element for this specific part, per part
+			elCSSUniqueAttributeK    : "data-kern-unique",
+			elCSSUniqueAttributeVFxn : root=>root.counter,
 		},
 		// storage
 		partO : {},
@@ -61,7 +67,7 @@ var KERN;
 				break;case 7 : return null;
 				break;case 8 : return false;}},
 		// utilities, had to scope them here, they were originally in another library that would have had to be linked
-		ll    : (...m)=>{m.forEach(v=>console.log(v));},
+		ll    : (...m)=>{return;m.forEach(v=>console.log(v));},
 		debugF : true,
 		debugIndentLevel : 0,
 		debugMicrosecondTolerance : 100,
@@ -194,6 +200,8 @@ var KERN;
 					return ((k === -1) ? undefined : this.get(k));},
 				includes   : function(v,searchI){
 					if (typeof searchI === "undefined"){searchI = 0;}
+					//KERN.ll(v);
+					//KERN.ll(this.arr[this.indexOf(v,searchI)]);
 					return (this.indexOf(v,searchI) !== -1);},
 				map        : function(){return this.arr.map(arguments[0]);},
 				mapO       : function(){return this.arr.mapO(arguments[0]);},
@@ -261,10 +269,10 @@ var KERN;
 			var resExtension = this.partO[o.partID].gen();
 			var kA = Object.keys(resExtension);
 			for (var kAI = 0,kAC = kA.length; kAI < kAC; kAI++){var k = kA[kAI];var v = resExtension[k];
-				switch (k){default                :;
+				switch (k){default                :res[k] = v;
 					break;case "o"                :
 						var o_kA = Object.keys(v);var o_kAC = o_kA.length;
-						for (var o_kAI = 0; o_kAI < o_kAC; o_kAI++){var o_k = o_kA[o_kAI];var o_v = resExtension[o_k];
+						for (var o_kAI = 0; o_kAI < o_kAC; o_kAI++){var o_k = o_kA[o_kAI];var o_v = v[o_k];
 							res[k][o_k] = o_v;}
 					break;case "portInA"               :res.portInP .pushA(v);
 					break;case "portOutA"              :res.portOutP.pushA(v);
@@ -277,22 +285,14 @@ var KERN;
 					break;case "refresh_SUB"           :res[k] = v;
 					break;case "refreshResize_SUB"     :res[k] = v;
 					break;case "drawFrame_SUB"         :res[k] = v;
-					break;case "destroy_SUB"           :res[k] = v;}
-				res[k] = v;}
+					break;case "destroy_SUB"           :res[k] = v;}}
 			if (typeof o.importAllF     !== "undefined"){res.importAllF     = o.importAllF    ;}
 			if (typeof o.exportAllF     !== "undefined"){res.exportAllF     = o.exportAllF    ;}
 			if (typeof o.importAllPortA !== "undefined"){res.importAllPortA = o.importAllPortA;}
 			if (typeof o.exportAllPortA !== "undefined"){res.exportAllPortA = o.exportAllPortA;}
-			var el = null;
 			if (o.elP !== null){
-				var k = this.pcv.elInnerAttributeK;
-				var v = this.pcv.elInnerAttributeVFxn(res);
-				el = document.createElement("div");
-				el.setAttribute(k,v);
-				o.elP.appendChild(el);
-				res.cssID = "["+k+"]='"+v+"'";
-				res.elP = o.elP;
-				res.el  = o.el ;}
+				res.elP = o.elP;}
+			res.o.root = res; // convenience, if you have root.o, let every element refer to root
 			res.setup(o.datA);
 			return res;},
 		gen : function(o={}){
@@ -300,15 +300,24 @@ var KERN;
 			// return negative shifts "a" left
 			// return 0 generally doesn't do anything, but not safe to assume much else
 			// return positive shifts "a" right
-			var sortCompareFxn           = (a,b)=>a[0].localeCompare(b[0]);
-			var searchCompareBaseFxn     = (a,b)=>a   .localeCompare(b[0]); // use the propertyname to search
-			var searchCompareFullFxn     = (a,b)=>{ // use the full array-chain to search
-				var aC = a.length;
-				var bC = b.length;
-				if (aC !== bC){return false;}
-				for (var i = 0; i < aC; i++){
-					if (a[i] !== b[i]){return false;}}
-				return true;};
+			var sortCompareFxn           = (a,b)=>{
+				var cmp = 0;
+				for (var i = 0;; i++){
+					var aDef = (i < a.length);
+					var bDef = (i < a.length);
+					if       (!aDef && !bDef)  {break;}
+					else  if (!aDef &&  bDef)  {return  -1;}
+					else  if ( aDef && !bDef)  {return   1;}
+					else/*if ( aDef &&  bDef)*/{
+						var ai = a[i];
+						var bi = b[i];
+						if (typeof ai === "number" && typeof bi === "number"){cmp = ai-bi;}
+						else{cmp = a[i].localeCompare(b[i]);}
+						if (cmp === 0){continue;}
+						else{return cmp;}}}
+				return cmp;};
+			var searchCompareBaseFxn     = (a,b)=>a.localeCompare(b[0]); // use the propertyname to search
+			var searchCompareFullFxn     = sortCompareFxn;
 			var searchCompareFxnA = [
 				searchCompareBaseFxn,
 				searchCompareFullFxn,];
@@ -337,14 +346,49 @@ var KERN;
 				el         : null, // the root element for this KERN thing
 				// put basic properties here that you think every element should have
 				o          : {
+					log      : [],
 					tx       : [0,0,1  ,1], // the color for text, specified in normalized HSLA
 					co       : [0,1,0.5,1], // the color for text, specified in normalized HSLA
-					bg       : [0,0,0  ,1], // the color for text, specified in normalized HSLA
+					bg       : [0,0,0  ,0.65], // the color for text, specified in normalized HSLA
 				}, // where KERN#-specific variables go, including public variables
+				
+				ll : function(m){var root = this;var _ = this.o;
+					_.log.push(m);
+					root.changed(["log"]);
+					root.export();},
+				
+				genElA : function(){
+					var resO = {};
+					var elM = this.elP.querySelectorAll("["+KERN.pcv.elAttributeK_ofUnique+"]");
+					for (var elMI = 0,elMC = elM.length; elMI < elMC; elMI++){var el = elM[elMI];
+						resO[el.getAttribute(KERN.pcv.elAttributeK_ofUnique)] = el;}
+					return resO;},
+				// major explanation needed:
+				// partType example : KERN000001 (the registered name of the KERN part)
+				// unique   example : aaba (like the "id" attribute, but scoped to this element - if you fill these in for all elements, genElA() will be of great help to you later)
+				//(class    example): title-large (anything you want, in the classic CSS "class" manner - not specially handled, just a normal selector)
+				// L> class names specific to the element [to not mix with globally-defined class with the same name] should be run through genClassS(), which appends an identifier to the classname
+				// instance example : 23 (the 23rd el generated on the page)
+				// Q&A:
+				// Q: Why don't you get rid of the oppressive "class" thing, and rename "aux" to "class"
+				// A: While KERN elements were simpler [all spec3 elements], a higher-level class was not needed. It had to be added to the KERN4 spec, preferably without redoing a large part of the styling algorithms.
+				genCSSRulePartialS_ofPartType : function( ){return "["+KERN.pcv.elAttributeK_ofPartType+"='"+KERN.pcv.elAttributeVFxn_ofPartType(this)+"']";},
+				genCSSRulePartialS_ofUnique   : function(s){return "["+KERN.pcv.elAttributeK_ofUnique  +"='"+s                                        +"']";},
+				genCSSRulePartialS_ofInstance : function( ){return "["+KERN.pcv.elAttributeK_ofInstance+"='"+KERN.pcv.elAttributeVFxn_ofInstance(this)+"']";},
+				genCSSUniqueRulePartialS      : function(s){return this.genCSSRulePartialS_ofPartType()+this.genCSSRulePartialS_ofUnique(s)+this.genCSSRulePartialS_ofInstance();},
+				genCSSGenericRulePartialS     : function(s){return this.genCSSRulePartialS_ofPartType()+this.genCSSRulePartialS_ofUnique(s);},
+				genClassS                     : function(...m){return m.map(s=>"."+KERN.pcv.elAttributeVFxn_ofPartType(this)+"-"+s).join("");},
+				gcrps_ofPartType : function(){return this.genCSSRulePartialS_ofPartType.apply(this,arguments);},
+				gcrps_ofUnique   : function(){return this.genCSSRulePartialS_ofUnique  .apply(this,arguments);},
+				gcrps_ofInstance : function(){return this.genCSSRulePartialS_ofInstance.apply(this,arguments);},
+				gcurps           : function(){return this.genCSSUniqueRulePartialS.apply(this,arguments);},
+				gcgrps           : function(){return this.genCSSGenericRulePartialS.apply(this,arguments);},
+				gcs              : function(){return this.genClassS.apply(this,arguments);},
+				
 				deadEndSA  : ["tx","co","bg"], // these properties will not chain into any derived properties
 				
 				portInP    : KERN.SortedArray({sortCompareFxn:sortCompareFxn,searchCompareFxnA:searchCompareFxnA,arr:[["tx",KERN.typeO.string],["co",KERN.typeO.string],["bg",KERN.typeO.string]]}), // the full port specification
-				portOutP   : KERN.SortedArray({sortCompareFxn:sortCompareFxn,searchCompareFxnA:searchCompareFxnA,arr:[]}), // the full port specification
+				portOutP   : KERN.SortedArray({sortCompareFxn:sortCompareFxn,searchCompareFxnA:searchCompareFxnA,arr:[["log",KERN.typeO.complexReference]]}), // the full port specification
 				
 				importAllF      : false,
 				importAllPortA  : [],
@@ -412,11 +456,37 @@ var KERN;
 				ifFullForceF : false, // used during setup() to fake that every possible import port has been altered
 				ifFullExportForceF : false, // used before [and after] export() to fake that every possible export port has been altered
 				
+				// char in str
+				π_cins:function(c,s){
+					var loopmax = s.length;
+					for (var i = 0; i < loopmax; i++){
+						if (s[i] === c){return true;}}
+					return false;},
+				//•ping - faux-class, actual name prepended with partID
+				//∑ - [standalone] of this partID
+				//¶ - [standalone] of this instanceID
+				cssReplKFxn:function(s){
+					if (this.π_cins("•",s)){s = s.replace(/•([a-zA-Z0-9\-_]+)/g,(m,p1)=>"."+this.name+"-class-"+p1);}
+					if (this.π_cins("†",s)){s = s.replace(/†([a-zA-Z0-9\-_]+)/g,(m,p1)=>"."+this.name+"-type-"+p1);}
+					if (this.π_cins("∑",s)){s = s.replace(/∑/g,()=>this.genCSSRulePartialS_ofPartType());}
+					if (this.π_cins("¶",s)){s = s.replace(/¶/g,()=>this.genCSSRulePartialS_ofInstance());}
+					return s;},
+				cssReplVFxn:function(s){return s;},
+				// used when making els, since we want each el tagged with this info
+				cssReplKTagFxn:function(s){
+					s += this.genCSSRulePartialS_ofPartType();
+					s += this.genCSSRulePartialS_ofInstance();
+					return s;},
+				
 				//----
 				
+				// return null if you do not wish to assert [recalculate and possibly change] CSS [for performance reasons, perhaps]
+				genMultiCSSO : function(){return null;},
+				genUniqueCSSO : function(){return null;},
+				
 				// convenience translation
-				changed : function(a){
-					this.alteredPropertyFullExportP.push(a);},
+				changed : function(){
+					this.alteredPropertyFullExportP.pushA(Array.prototype.slice.call(arguments));},
 				
 				importInitialForce_SUB     : function(){},
 				importInitialForce         : function(datA){if (KERN.debugF){var startT = KERN.now();KERN.ll(KERN.debugIndentS.repeat(KERN.debugIndentLevel)+"v importInitialForce "+this.name+"_"+this.counter);KERN.debugIndentLevel++;}
@@ -434,6 +504,19 @@ var KERN;
 					// ! do not mix these import calls, keeping them separate will ensure that the intention of the programmer is met
 					this.importInitialForce();
 					this.import(datA);
+					var elCSS = document.head.querySelector("style["+KERN.pcv.elCSSMultiAttributeK+"='"+KERN.pcv.elCSSMultiAttributeVFxn(this)+"']");
+					var elMissingF = (elCSS === null);
+					var cssO = this.genMultiCSSO(elMissingF);
+					if (cssO !== null){
+						var cssOKA = Object.keys(cssO);
+						var cssS = "";
+						for (var cssOKAI = 0,cssOKAC = cssOKA.length; cssOKAI < cssOKAC; cssOKAI++){cssOK = cssOKA[cssOKAI];cssOV = cssO[cssOK];
+							cssS += this.cssReplKFxn(cssOK)+"{"+this.cssReplVFxn(cssOV)+"}";}
+						if (elMissingF){
+							elCSS = document.createElement("style");elCSS.setAttribute(KERN.pcv.elCSSMultiAttributeK,KERN.pcv.elCSSMultiAttributeVFxn(this));}
+						elCSS.textContent = cssS;
+						if (elMissingF){
+							document.head.appendChild(elCSS);}}
 					this.refreshResize();
 					this.refresh();
 					setTimeout(function(that){return function(){KERN.uniani.register("KERN_"+that.counter,that);};}(this),0);
@@ -474,7 +557,7 @@ var KERN;
 						if (typeof guide === "undefined" && internalF){
 							guide = this.portOutP.find(propertyname,0);} // example: guide = ["elephantOA",KERN.typeO.array,KERN.typeO.object,KERN.typeO.flag]
 						if (typeof guide === "undefined"){
-							KERN.ll("KERN ERROR : Element "+this.name+"_"+this.counter+" was fed an with a not-accepted property : "+propertyname,this.portInP.arr);return;}
+							KERN.ll("KERN ERROR : Element "+this.name+"_"+this.counter+" was fed with a not-accepted property : "+propertyname,this.portInP.arr);return;}
 						var base;var k;var v = _; // reason: we cannot assign directly to a variable, we need a base and a k, as in : base[k] = v
 						var entryFull = [];
 						for (var propEntI = 0,propEntC = propEnt.length; propEntI < propEntC-1; propEntI++){ // example: for ["elephantOA",12,"cat"], ignoring the last element, which is the leaf value
@@ -509,10 +592,19 @@ var KERN;
 				refresh_SUB   : function(){},
 				refresh       : function(){if (KERN.debugF){var startT = KERN.now();KERN.ll(KERN.debugIndentS.repeat(KERN.debugIndentLevel)+"v refresh "+this.name+"_"+this.counter);KERN.debugIndentLevel++;}
 					var _ = this.o;
-					if (this.if("tx","co","bg")){
-						var elCSS = document.createElement("style");elCSS.setAttribute(KERN.pcv.elCSSAttributeK,this.name);
-						elCSS.textContent = this.name+"_"+this.counter+"{"+KERN.genCSSVarS({tx:_.tx,co:_.co,bg:_.bg})+"}";
-						document.head.appendChild(elCSS);}
+					var elCSS = document.head.querySelector("style["+KERN.pcv.elCSSUniqueAttributeK+"='"+KERN.pcv.elCSSUniqueAttributeVFxn(this)+"']");
+					var elMissingF = (elCSS === null);
+					var cssO = this.genUniqueCSSO(elMissingF);
+					if (cssO !== null){
+						var cssOKA = Object.keys(cssO);
+						var cssS = "";
+						for (var cssOKAI = 0,cssOKAC = cssOKA.length; cssOKAI < cssOKAC; cssOKAI++){cssOK = cssOKA[cssOKAI];cssOV = cssO[cssOK];
+							cssS += this.cssReplKFxn(cssOK)+"{"+this.cssReplVFxn(cssOV)+"}";}
+						if (elMissingF){
+							elCSS = document.createElement("style");elCSS.setAttribute(KERN.pcv.elCSSUniqueAttributeK,KERN.pcv.elCSSUniqueAttributeVFxn(this));}
+						elCSS.textContent = cssS;
+						if (elMissingF){
+							document.head.appendChild(elCSS);}}
 					this.refresh_SUB();
 					if (KERN.debugF){var endT = KERN.now();KERN.debugIndentLevel--;if (endT - startT > KERN.debugMicrosecondTolerance){KERN.ll(KERN.debugIndentS.repeat(KERN.debugIndentLevel)+"^ refresh "+this.name+"_"+this.counter+" "+(endT-startT)+"µs");}}},
 				
@@ -537,9 +629,10 @@ var KERN;
 							var datA = [];
 							connection.portA.forEach(pair=>{ // example: pair = [["valueA",5],["somethingAA",14,32]]
 								var sndChain = pair[0];
-								KERN.ll("----");
-								KERN.ll(this.ifFullExportForceF);
-								KERN.ll(this.ifFullExport(["lolcatz"])); // !!! HERE, this is a joke code line that should ALWAYS return false, but it's returning true sometimes ...
+								//KERN.ll("----");
+								//KERN.ll(this.ifFullExportForceF);
+								//KERN.ll("----");
+								//KERN.ll(this.ifFullExport(["lolcatz"])); // !!! HERE, this is a joke code line that should ALWAYS return false, but it's returning true sometimes ...
 								if (!this.ifFullExport(sndChain)){return;}
 								// v warning: this line's if() will only refer to, consistently, the same changed-information until we call import() again
 								// v          if this element feeds into itself, it will modify those if() returns while we're in the middle of export() logic
