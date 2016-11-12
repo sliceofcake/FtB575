@@ -30,7 +30,7 @@ var p = {
 		var el = µ.qd(".panel¥"+o.k);
 		this.elKERNO[o.k       ] = KERN.create(π.ooa(o.datO,{elP:µ.qd(".panel¥"+o.k+">.main"    )}));
 		this.elKERNO[o.k+"_log"] = KERN.create({partID:"KERN000022",elP:µ.qd(".panel¥"+o.k+">.log")});
-		p.elKERNO[o.k].registerAssert({rcvRoot:p.elKERNO[o.k+"_log"],portA:[[["log"],["log"]]]});
+		this.elKERNO[o.k].registerAssert({rcvRoot:this.elKERNO[o.k+"_log"],portA:[[["log"],["log"]]]});
 		el.style.top    = o.t+"px";
 		el.style.left   = o.l+"px";
 		el.style.width  = o.w+"px";
@@ -64,5 +64,6 @@ document.addEventListener("DOMContentLoaded",()=>{
 <style>
 	/*:root>body>[data-type='auth1'] {top: 10px;left: 10px;width:400px;height:300px;}*/
 </style>
+</head>
 <body>
 </body></html>

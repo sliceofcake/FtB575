@@ -136,9 +136,17 @@ function arrval($mystery){
 // [e] no
 // [r] status
 function is_boring($m){
-	if (!is_string($m)){return FALSE;}
-	if (preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/',$m) !== 1){return FALSE;}
-	return TRUE;}
+	if (!is_string($m)){return F;}
+	if (preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/',$m) !== 1){return F;}
+	return T;}
+// it doesn't have to be correct all the time, it just has to never return FALSE incorrectly - when in doubt, assume it breaks paths
+function is_path_breaker($m){
+	if (!is_string($m)){return T;}
+	if ($m === ""  ){return T;}
+	if ($m === "." ){return T;}
+	if ($m === ".."){return T;}
+	if (preg_match('/^[a-zA-Z_][a-zA-Z0-9_\.]*$/',$m) !== 1){return T;}
+	return F;}
 
 // only allow keys from keyArr to appear in modified arr
 // [e] no

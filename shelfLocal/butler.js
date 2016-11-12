@@ -100,7 +100,7 @@ function isFxn(m){return (typeof m === "function");}
 
 var Ω = {
 	mousedownF  : F,
-	idCounter   : 0,
+	ID          : 0,
 	css         : [],
 	timeUpgrade : (()=>{var a,b;a=Date.now();b=performance.now();return(a-b)*1000;})(),
 	t           : {},
@@ -623,8 +623,8 @@ var µ = {
 // other stuff
 var π = {
 	// generate a unique id, an integer
-	id:function(){
-		return Ω.id++;},
+	genID:function(){
+		return Ω.ID++;},
 	// !!! replacing of arrays ... there are a few ways it could be done
 	// array <-- array ; property absorb
 	// ([1,2,3],[3,4,5],{blockDuplicate:true }) --> [1,2,3,4,5]

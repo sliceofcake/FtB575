@@ -39,7 +39,16 @@ function D_qi($tbl,$arr){
 function D_qd($tbl,$ID){
 	if (!in_array($tbl,DB_TABLE_ARR(),T)){SET_RETURN_MSG("invalid table:".str($tbl)." passed to D_qu()");return F;}
 	if (!isI($ID)){SET_RETURN_MSG("invalid ID:".str($ID)." passed to D_qu()");return F;}
-	db_q("DELETE FROM ".$tbl." WHERE ID='".esc($ID)."' LIMIT 1");}
+	// !!! hardcoded files to delete, maybe in the #next-core, we'll have files treated in an even more standardized way
+	switch ($tbl){default:;
+		break;case "chart":
+			$oldE = D_qs($tbl,$ID);
+			if ($oldE === F){SET_RETURN_MSG("could not retrieve entity while trying to get its metadata in order to properly delete it");return F;}
+			unlink(ROOT()["DIR_FILE"].$tbl."/txtR_".str($ID).$oldE["txtRExtension_DERIVED"]);
+			unlink(ROOT()["DIR_FILE"].$tbl."/icoR_".str($ID).$oldE["icoRExtension_DERIVED"]);
+	}
+	db_q("DELETE FROM ".$tbl." WHERE ID='".esc($ID)."' LIMIT 1");
+	return T;}
 // query SELECT COUNT(*)
 function D_qc($tbl,$fragment){
 	if (!in_array($tbl,DB_TABLE_ARR(),T)){SET_RETURN_MSG("invalid table:".str($tbl)." passed to D_qu()");return F;}
@@ -74,8 +83,7 @@ function rowReturnFilter($tbl,&$row,$exrelA,$multiGrab=F){
 			if (in_array("participant",$exrelA,T)){$row["participantIDA"] = D_exrel($tbl,$row["ID"],"participant");}
 		break;case "message":
 		break;case "participant":
-		break;case "plushie":
-			unset($row["hash"]);
+		break;case "user_plushie":
 		break;case "user":
 			if (in_array("message"    ,$exrelA,T)){$row["messageIDA"    ] = D_exrel($tbl,$row["ID"],"message"    );}
 			if (in_array("participant",$exrelA,T)){$row["participantIDA"] = D_exrel($tbl,$row["ID"],"participant");}

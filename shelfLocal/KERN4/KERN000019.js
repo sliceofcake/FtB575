@@ -123,6 +123,7 @@
 									["•title","Chart Search"],
 									µ.bscss("refresh",[".button",{click:(function(that){return function(){var root = that;var _ = that.o;_.chartIDAGet();};})(root)}],"†refresh"),
 								]],
+								["•brick†table-a"],
 								["•brick†multi-column",[
 									["†slot-ID"             ,"ID"              ],
 									["†slot-userID"         ,"uploader"        ],
@@ -139,6 +140,9 @@
 							
 						]],
 					]],[v=>root.cssReplKFxn(v),v=>root.cssReplKTagFxn(v)]));
+					var ID = π.genID();
+					p.elKERNO["subKERN"+ID] = KERN.create({partID:"KERN000022",elP:µ.qd(root.cssReplKFxn("¶†table-a"))});
+					root.registerAssert({rcvRoot:p.elKERNO["subKERN"+ID],portA:[[["log"],["log"]]]});
 					},
 				refresh_SUB   : function(){var root = this;var _ = this.o;},
 				destroy_SUB : function(){var root = this;var _ = this.o;},

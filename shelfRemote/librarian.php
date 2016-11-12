@@ -16,14 +16,23 @@ require_once("specific.php");
 // THIS INFORMATION MUST BE CHANGED BEFORE RELEASING
 // THIS INFORMATION MUST BE CHANGED BEFORE RELEASING
 // THIS INFORMATION MUST BE CHANGED BEFORE RELEASING
-$ROOT = [
-	"STABLE_F"  => T,
-	"VERSION"   => 1,
-];
-$ROOT["DIR_WEBROOT"   ] = "/home/ftbsliceofcake2/feelthebeats.se/";
-$ROOT["DIR_VERSION"   ] = $ROOT["DIR_WEBROOT"].($ROOT["STABLE_F"]?"575/":"575_unstable/");
-$ROOT["DIR_FILE_CHART"] = $ROOT["DIR_VERSION"]."file/chart/";
-$ROOT["DB_NAME"       ] = "FtB575_".$ROOT["VERSION"];
+function ROOT(){ // PHP and globals smh
+	$ROOT = [
+		"STABLE_F"  => T,
+		"VERSION"   => 2,
+	];
+	$ROOT["DIR_WEBROOT"     ] = "/home/ftbsliceofcake2/feelthebeats.se/";
+	$ROOT["EXT_WEBROOT"     ] = "/";
+	$ROOT["DIR_VERSION"     ] = $ROOT["DIR_WEBROOT"].($ROOT["STABLE_F"]?"575/":"575_unstable/");
+	$ROOT["EXT_VERSION"     ] = $ROOT["EXT_WEBROOT"].($ROOT["STABLE_F"]?"575/":"575_unstable/");
+	$ROOT["DIR_FILE"        ] = $ROOT["DIR_VERSION"]."file/";
+	$ROOT["EXT_FILE"        ] = $ROOT["EXT_VERSION"]."file/";
+	$ROOT["DIR_FILE_DEFAULT"] = $ROOT["DIR_FILE"]."default/";
+	$ROOT["EXT_FILE_DEFAULT"] = $ROOT["EXT_FILE"]."default/";
+	$ROOT["DIR_FILE_CHART"  ] = $ROOT["DIR_FILE"]."chart/";
+	$ROOT["EXT_FILE_CHART"  ] = $ROOT["EXT_FILE"]."chart/";
+	$ROOT["DB_NAME"         ] = "FtB575_".$ROOT["VERSION"];
+	return $ROOT;}
 //======================================================================================================================
 function DB_ROW_LIMIT(){return 1000;} // general answer for "at most, how many rows should be fetched in a query"
 function DB_TINYTEXT_LENGTH(){return intval(floor(255/4));} // max of 4 Bytes per characters in UTF-8

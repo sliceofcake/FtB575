@@ -10,7 +10,7 @@ $ERROR_LOG_PATH = "/home/ftbsliceofcake2/mysqlErrorLog/";
 $SQL_HOSTNAME="127.0.0.1";
 $SQL_USERNAME="ftbdb";
 require("/home/ftbsliceofcake2/secret/mysql_575.php");
-$SQL_DB=$GLOBALS["ROOT"]["DB_NAME"];
+$SQL_DB=ROOT()["DB_NAME"];
 $SQL_LINK = mysqli_connect($SQL_HOSTNAME,$SQL_USERNAME,$SQL_PASSWORD,$SQL_DB);
 $DB_LINK = $SQL_LINK;
 // check connection

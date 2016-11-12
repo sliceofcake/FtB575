@@ -39,4 +39,4 @@ If you have FtB575 /edit/ loaded and you save it through your web browser [proba
   
 **What changed from the previous build to this build:**  
 • absolutely nothing related to /edit/  
-• groundwork for server-connectivity and chart management system  
+• /simple/ provides a traditional web-interface for viewing, creating, editing, and deleting data of FtB575, such as "chart"s and "user"s  
