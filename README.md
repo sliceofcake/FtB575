@@ -29,6 +29,7 @@ With the panel called something like "audio leeway", you can control how tightly
 **Link[s]/URL[s] to this build:**  
 [https://feelthebeats.se/575/edit/](https://feelthebeats.se/575/edit/)  
 [https://feelthebeats.se/575/simple/](https://feelthebeats.se/575/simple/)  
+[https://feelthebeats.se/575/simple/?tbl=chart&act=dmp](https://feelthebeats.se/575/simple/?tbl=chart&act=dmp)  
   
 **Where can I find charts?**  
 [http://osusearch.com/search/?statuses=Ranked&modes=Mania](http://osusearch.com/search/?statuses=Ranked&modes=Mania)  
