@@ -90,8 +90,9 @@ var KERN000006 = {
 				translateSignalO : {},
 				translatedSO : [],
 				
-				layernameA : ["S","J","Decon082_ver1","N","L"],
+				layernameA : ["S","hannanos_ver1","J","Decon082_ver1","N","L"],
 				modO_Decon082_ver1  : {overlayA:[]},
+				modO_hannanos_ver1 : {bubbleF:1,textF:1,language:"english",durationT:1000000,lanexpaintEA:[],counter:0}, // bubbleF and textF should be booleans, but KERN3 sliders don't support that
 				
 				// utilities [optimizations]
 				errorToScore : function(error,boundary=this.missBoundary){return (error>boundary)?0:Math.cos(Math.PI*error/(2*boundary))*boundary;},
@@ -266,6 +267,38 @@ var KERN000006 = {
 						switch (which){default:
 						// [s] shield
 						break;case "S":
+						// mod : hannanos_ver1
+						break;case "hannanos_ver1":
+							anipnt.clearRect(ctx,0,0,w,h,_.pxd);
+							if (_.modO_hannanos_ver1.bubbleF || _.modO_hannanos_ver1.textF){
+								for (var l = 1; l <= this.keyC; l++){
+									if (typeof _.modO_hannanos_ver1.lanexpaintEA[l] === "undefined"){_.modO_hannanos_ver1.lanexpaintEA[l] = [];}
+									_.modO_hannanos_ver1.lanexpaintEA[l].forEach((paintE,paintEAI,paintEA)=>{
+										if (typeof paintE.ID === "undefined"){paintE.ID = _.modO_hannanos_ver1.counter++;}
+										var x = ((l-1)*this.noteW)+(l*this.laneDividerW);
+										
+										// FtB4 : Perfect:≤50ms Great:≤75ms Good:≤100ms Bad:≤125ms Miss
+										var co = this.hitboxActiveCoA[l];
+										var tx = this.hitboxActiveCoA[l];
+										var s = (paintE.type==="down"?"↓":"↑");
+										if      (paintE.err <=  50000){s+="PERFECT";}
+										else if (paintE.err <=  75000){s+="GREAT";}
+										else if (paintE.err <= 100000){s+="GOOD";}
+										else if (paintE.err <= 125000){s+="BAD";}
+										else                          {s+="MISS";}
+										
+										if (_.modO_hannanos_ver1.bubbleF){
+											anipnt.traceRect(ctx,x,this.timeToPixel(this.chartP+paintE.err),this.noteW,this.noteH,co,_.pxd);}
+										if (_.modO_hannanos_ver1.textF){
+											if (_.modO_hannanos_ver1.language === "english"){
+												anipnt.fillText(ctx,s,x,this.timeToPixel(this.chartP+paintE.err),tx,_.pxd);}}
+										if (typeof paintE.destroyTimeout === "undefined"){
+											paintE.destroyTimeout = setTimeout((function(_,paintEA,ID){return function(){
+												paintEA.splice(paintEA.findIndex(paintE=>paintE.ID===ID),1);
+												_.renderRegister("hannanos_ver1");
+											};})(_,paintEA,paintE.ID),_.modO_hannanos_ver1.durationT/1000);}
+									});}
+							}
 						// [j] judgement line, with key hitboxes
 						break;case "J":
 							anipnt.clearRect(ctx,0,0,w,h,_.pxd);
@@ -586,7 +619,7 @@ var KERN000006 = {
 					_.hitC     = _.chartBox.noteA.reduceSum(note=>typeof note.tail === "undefined");
 					_.holdC    = _.chartBox.noteA.reduceSum(note=>typeof note.tail !== "undefined");
 					_.scoreMax = (_.hitC*_.missBoundary) + (_.holdC*_.missBoundary*2);}
-				if (this.if("pxd")){_.renderRegister("S","J","Decon082_ver1","N","L");_.sizeAll();}
+				if (this.if("pxd")){_.renderRegister("S","hannanos_ver1","J","Decon082_ver1","N","L");_.sizeAll();}
 				if (this.if("laneDividerCo","laneDividerW")){_.renderRegister("J","L");_.widthField = _.noteW*_.keyC + _.laneDividerW*(_.keyC+1);}
 				if (this.if("laneDividerW")){_.renderRegister("N");}
 				if (this.if("chartP")){_.renderRegister("N");}
@@ -643,6 +676,8 @@ var KERN000006 = {
 										if (distanceBest === N || distance < distanceBest){/*ll("store");*/distanceBest = distance;noteBestI = noteI;}}
 									// use the closest note for the comparison
 									if (noteBestI !== -1 && distanceBest <= _.missBoundary){var note = _.lanexnoteA[laneI][noteBestI];
+										_.modO_hannanos_ver1.lanexpaintEA[laneI].push({type:"down",err:note.head-tDejusted});
+										_.renderRegister("hannanos_ver1");
 										//ll("distanceBest : "+distanceBest);
 										//ll("noteBestI : "+noteBestI);
 										//ll(note);
@@ -690,6 +725,8 @@ var KERN000006 = {
 									var noteFinalI = _.lanexnoteA[laneI].length-1;
 									for (var noteI = 0; noteI <= noteFinalI; noteI++){var note = _.lanexnoteA[laneI][noteI];
 										if (note.started === T && note.ended === F){
+											_.modO_hannanos_ver1.lanexpaintEA[laneI].push({type:"up",err:note.tail-tDejusted});
+											_.renderRegister("hannanos_ver1");
 											note.ended = T;
 											_.noteInstantStatA.push({whichEnd:"tail",note:π.cc(note),t:tDejusted,timeUntilExact:note.tail-tDejusted,missBoundary:_.missBoundary});
 											_.earnedTailC++;
@@ -744,6 +781,7 @@ var KERN000006 = {
 					return breakF;});
 				*/
 				if (this.if(colornameA)){_.renderRegister("J","L");}
+				if (this.if("modO_hannanos_ver1")){_.renderRegister("hannanos_ver1");}
 				if (this.if("modO_Decon082_ver1")){_.renderRegister("Decon082_ver1");}
 				if (this.if("tTentativeSignal") && _.tTentativeSignal !== N){_.jump(_.tTentative*_.duration);}
 				if (this.ifFull(["keyStateA","reset"]) && _.keyStateA.reset    === 1){_.jump(-_.introWaitTime);}
@@ -774,7 +812,7 @@ var KERN000006 = {
 				_.sizeAll();},
 			refreshResize_SUB : function(){var _ = this.o;
 				_.sizeAll();
-				_.renderRegister("S","J","Decon082_ver1","N","L");},
+				_.renderRegister("S","hannanos_ver1","J","Decon082_ver1","N","L");},
 			drawFrame_SUB : function(now){//now *= 1000;//if (Math.random()<0.1){ll(this.state);}
 				var _ = this.o;
 				_.chartT = now;
@@ -826,6 +864,7 @@ var KERN000006 = {
 			["speedMultiplier",KERNTypeO.number],
 			["keyStateA",KERNTypeO.array,KERNTypeO.number],
 			["translateSignalO",KERNTypeO.object,KERNTypeO.signal],
+			["modO_hannanos_ver1",KERNTypeO.object,KERNTypeO.complex],
 			["modO_Decon082_ver1",KERNTypeO.object,KERNTypeO.array,KERNTypeO.object,KERNTypeO.complex],
 			["tTentativeSignal",KERNTypeO.signal],
 			["tTentative",KERNTypeO.number],

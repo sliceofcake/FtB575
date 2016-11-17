@@ -1,25 +1,28 @@
 (function(){
-	KERN.partO["KERN000022"] = {
+	KERN.partO["KERN000023"] = {
 		gen : function(){
 			var oo = {
 				o : {
 					// internal
 					// imports and exports
 					log : [],
-					headerSA : [],
-					
+					dat : [],
+					datTranslation : {},
 					// utilities
 				},
-				portInA  : [["log",KERN.typeO.complex]],
+				portInA  : [["dat",KERN.typeO.complexReference],["datTranslation",KERN.typeO.complexReference]],
 				portOutA : [],
 				//•ping - faux-class, actual name prepended with partID
 				//†ping - faux-¥, actual name prepended with partID and something else
 				//∑ - [standalone] of this partID
 				//¶ - [standalone] of this instanceID
 				genMultiCSSO : function(elMissingF){var root = this;var _ = this.o;return µ.cssO({
-					"∑"       : "box-sizing:border-box;",//¥c:var(--c);
-					"†root"   : "¥:relative;¥w:1000‰;¥h:1000‰;¥o:auto;",
-					"†root>*" : "¥w:1000‰;",
+					"∑"           : "box-sizing:border-box;",//¥c:var(--c);
+					"†root"       : "¥:relative;¥w:1000‰;¥h:1000‰;¥o:auto;",
+					"†root>*"     : "¥w:1000‰;",
+					"†root>†head" : "",
+					"†root>†main" : "",
+					"†root>†foot" : "",
 				});},
 				genUniqueCSSO : function(elMissingF){var root = this;var _ = this.o;
 					if (elMissingF || this.if("tx","co","bg")){
@@ -33,10 +36,20 @@
 				stabilize_SUB : function(){var root = this;var _ = this.o;},
 				setup_SUB     : function(){var root = this;var _ = this.o;
 					µ.rr(this.elP,µ.m([[
-						["†root"],
+						["†root",[
+							["†head"],
+							["†main"],
+							["†foot"],
+						]],
 					]],[v=>this.cssReplKFxn(v),v=>this.cssReplKTagFxn(v)]));
 					},
 				refresh_SUB   : function(){var root = this;var _ = this.o;
+					ll(_.datTranslation,_.dat);
+					return;
+					if (root.if("datTranslation","dat")){
+						var header = _.dat.map(row=>Object.keys(row)).makeUnique();
+						
+					}
 					µ.rr(µ.qd(this.elP,root.cssReplKFxn("¶†root")),µ.m([
 						_.log.mapReverse(m=>{
 							if (typeof m !== "number" && typeof m !== "string" && typeof m !== "boolean"){m = π.jsonE(m);}

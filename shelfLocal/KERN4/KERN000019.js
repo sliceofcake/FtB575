@@ -4,8 +4,10 @@
 			var oo = {
 				o : {
 					// internal
-					elO       : {},
+					elO      : {},
 					chartIDA : [],
+					datTranslation : {},
+					dat      : [],
 					// imports and exports
 					// utilities
 					chartIDAGet : function(){var root = this.root;var _ = this;
@@ -20,9 +22,8 @@
 					},
 					fill:function(){var root = this.root;var _ = this;
 						root.ll("fill info -> ...");
-						ll(_.chartIDA);
-						var elA = _.chartIDA.map(chartID=>{
-							var chart = core.getRow("chart",chartID);
+						var chartA = _.chartIDA.mapFilter(chartID=>core.getRow("chart",chartID),N);
+						var elA = chartA.map(chart=>{
 							if (chart === N){
 								return ["†chart-card†multi-column",[
 									["†slot-ID"             ,""],
@@ -47,13 +48,24 @@
 									["†slot-laneC_DERIVED"  ,chart.laneC_DERIVED  ],
 								]];}
 						});
-						ll(elA);
+						_.datTranslation = {
+							"ID"             :"ID"         ,
+							"userID"         :"uploader"   ,
+							"titleS"         :"song title" ,
+							"originS"        :"song origin",
+							"durationN"      :"◷"          ,
+							"npsN_DERIVED"   :"♪/◷"        ,
+							"formatS_DERIVED":"format"     ,
+							"laneC_DERIVED"  :"◨"          ,};
+						_.dat = chartA;
+						root.changed(["datTranslation"],["dat"]);
+						root.export();
 						µ.rr(µ.qd(root.elP,root.cssReplKFxn("¶†root>†main")),µ.m([elA],[v=>root.cssReplKFxn(v),v=>root.cssReplKTagFxn(v)]));
 						root.ll("fill info -> success");
 					},
 				},
 				portInA  : [],
-				portOutA : [],
+				portOutA : [["dat",KERN.typeO.complexReference],["datTranslation",KERN.typeO.complexReference]],
 				//•ping - faux-class, actual name prepended with partID
 				//†ping - faux-¥, actual name prepended with partID and something else
 				//∑ - [standalone] of this partID
@@ -140,9 +152,10 @@
 							
 						]],
 					]],[v=>root.cssReplKFxn(v),v=>root.cssReplKTagFxn(v)]));
+					
 					var ID = π.genID();
-					p.elKERNO["subKERN"+ID] = KERN.create({partID:"KERN000022",elP:µ.qd(root.cssReplKFxn("¶†table-a"))});
-					root.registerAssert({rcvRoot:p.elKERNO["subKERN"+ID],portA:[[["log"],["log"]]]});
+					p.elKERNO["subKERN"+ID] = KERN.create({partID:"KERN000023",elP:µ.qd(root.cssReplKFxn("¶†table-a"))});
+					root.registerAssert({rcvRoot:p.elKERNO["subKERN"+ID],portA:[[["dat"],["dat"]],[["datTranslation"],["datTranslation"]]]});
 					},
 				refresh_SUB   : function(){var root = this;var _ = this.o;},
 				destroy_SUB : function(){var root = this;var _ = this.o;},

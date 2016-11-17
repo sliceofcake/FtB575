@@ -295,8 +295,8 @@ if ($tblE === F){fail("invalid tbl");}?>
 			// !!! hardcoded file downloads, deal with it until the next core
 			foreach ($req_get[0]["dat"][$import_tbl] as &$row){
 				if ($import_tbl === "chart"){
-					$row["txtR"] = "<a class=\"btn btn-primary\" href=\"".ROOT()["EXT_FILE_CHART"]."/txtR_".$row["ID"].$row["txtRExtension_DERIVED"]."\" download>download notes</a>";
-					$row["icoR"] = "<a class=\"btn btn-primary\" href=\"".ROOT()["EXT_FILE_CHART"]."/icoR_".$row["ID"].$row["icoRExtension_DERIVED"]."\" download>download icon</a>";}}unset($row);
+					$row["txtR"] = "<a class=\"btn btn-primary\" href=\"".ROOT()["EXT_FILE_CHART"]."txtR_".$row["ID"].$row["txtRExtension_DERIVED"]."\" download>download notes</a>";
+					$row["icoR"] = "<a class=\"btn btn-primary\" href=\"".ROOT()["EXT_FILE_CHART"]."icoR_".$row["ID"].$row["icoRExtension_DERIVED"]."\" download>download icon</a>";}}unset($row);
 			
 			// some rows will have fewer columns than others, so get the max columns
 			$headerKA = [];

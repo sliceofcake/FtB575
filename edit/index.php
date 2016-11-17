@@ -359,9 +359,9 @@ document.addEventListener("DOMContentLoaded",()=>{
 	p.shift("→");
 	/***/elKERNPreO[_="gfVolume0"        ] = {partID:"KERN000005",title:"volume"         ,initial:[["value",      0.8    ],["dirAsc","E"],["ascRoot",0],["min",      0    ],["max",      1    ],["snap",     0.05   ],["ascMode","additive"],["valueFxn",v=>v+"?"]]};p.preBuild();
 	p.shift("→");
-	/***/elKERNPreO[_="gfSnap0"          ] = {partID:"KERN000005",title:"snap"           ,initial:[["value",      4      ],["dirAsc","E"],["ascRoot",0],["min",      0    ],["max",     32    ],["snap",     1      ],["ascMode","additive"],["valueFxn",v=>v+"x"]]};p.preBuild();
+	/***/elKERNPreO[_="gfSnap0"          ] = {partID:"KERN000005",title:"snap"           ,initial:[["value",      0      ],["dirAsc","E"],["ascRoot",0],["min",      0    ],["max",     32    ],["snap",     1      ],["ascMode","additive"],["valueFxn",v=>v+"x"]]};p.preBuild();
 	p.shift("→");
-	/***/elKERNPreO[_="gf0JudgeLineRaise"] = {partID:"KERN000005",title:"jdgmnt line pos",initial:[["value",      0      ],["dirAsc","E"],["ascRoot",0],["min",      0    ],["max",   1000    ],["snap",    10      ],["ascMode","additive"],["valueFxn",v=>v+"‰"]]};p.preBuild();
+	/***/elKERNPreO[_="gf0JudgeLineRaise"] = {partID:"KERN000005",title:"jdgmnt line pos",initial:[["value",    100      ],["dirAsc","E"],["ascRoot",0],["min",      0    ],["max",   1000    ],["snap",    10      ],["ascMode","additive"],["valueFxn",v=>v+"‰"]]};p.preBuild();
 	p.shift("↓");
 	p.shift("←←");
 	/***/elKERNPreO[_="gfSnapLineH0"     ] = {partID:"KERN000005",title:"snap line thick",initial:[["value",      1      ],["dirAsc","E"],["ascRoot",0],["min",      0    ],["max",     20    ],["snap",     1      ],["ascMode","additive"],["valueFxn",v=>v+"px"]]};p.preBuild();
@@ -493,6 +493,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 	["hr","mn","sc"].forEach(v=>{elKERNDimO[v+"-handCo0"] = {w:30,h:s-h-p.handleH};});
 	elKERNDimO.forEach(elKERNDim=>{elKERNDim.i = elKERNDim.h + p.handleH;});
 	
+	var modHannaTAnchor = t;
 	/***/elKERNPreO[_="clock0"   ] = {partID:"KERN000007",title:"clock [24h]"      };p.preBuild();
 	p.shift("→");
 	/***/elKERNPreO[_="hr-handH0" ] = {partID:"KERN000005",title:"hr-hand ‰ length" ,initial:[["value", 500],["dirAsc","N"],["min",0],["max",1000],["snap",20],["valueFxn",v=>v+"‰"]]};p.preBuild();
@@ -515,6 +516,8 @@ document.addEventListener("DOMContentLoaded",()=>{
 	/***/elKERNPreO[_="mn-handW0" ] = {partID:"KERN000005",title:"min-hand width"   ,initial:[["value",3],["dirAsc","E"],["min",0],["max",10],["snap",1],["valueFxn",v=>v+"px"]]};p.preBuild();
 	p.shift("→");
 	/***/elKERNPreO[_="sc-handW0" ] = {partID:"KERN000005",title:"sec-hand width"   ,initial:[["value",2],["dirAsc","E"],["min",0],["max",10],["snap",1],["valueFxn",v=>v+"px"]]};p.preBuild();
+	p.shift("→");
+	var modHannaLAnchor = l;
 	
 	elKERNLinkA.push({from:"hr-handCo0",to:"clock0",portA:[[["coValue"],["hHandCo"]]]});
 	elKERNLinkA.push({from:"mn-handCo0",to:"clock0",portA:[[["coValue"],["mHandCo"]]]});
@@ -525,6 +528,32 @@ document.addEventListener("DOMContentLoaded",()=>{
 	elKERNLinkA.push({from:"hr-handH0" ,to:"clock0",portA:[[["value"  ],["hHandH" ]]]});
 	elKERNLinkA.push({from:"mn-handH0" ,to:"clock0",portA:[[["value"  ],["mHandH" ]]]});
 	elKERNLinkA.push({from:"sc-handH0" ,to:"clock0",portA:[[["value"  ],["sHandH" ]]]});
+	
+	
+	
+	
+	// hannanos's mod
+	tAnchor = modHannaTAnchor;
+	lAnchor = modHannaLAnchor;
+	p.shift("↑↑");
+	p.shift("←←");
+	var h = elKERNDimO["gfKeyreset"].h+elKERNDimO["gfKeyreset"].i;
+	elKERNDimO["bubbleHanna0"  ] = {w: 50,h:(elKERNDimO["clock0"].h-p.handleH)/2};
+	elKERNDimO["textHanna0"    ] = {w: 50,h:(elKERNDimO["clock0"].h-p.handleH)/2};
+	elKERNDimO["durationHanna0"] = {w: 50,h:elKERNDimO["clock0"].h};
+	elKERNDimO.forEach(elKERNDim=>{elKERNDim.i = elKERNDim.h + p.handleH;});
+	
+	/***/elKERNPreO[_="bubbleHanna0"  ] = {partID:"KERN000005",title:"bubble?hanna",initial:[["value",0],["dirAsc","N"],["ascRoot",0],["min",0],["max",1],["snap",1],["ascMode","additive"],["valueFxn",v=>v===1?"on":"off"]]};p.preBuild();
+	p.shift("↓");
+	/***/elKERNPreO[_="textHanna0"    ] = {partID:"KERN000005",title:"text?hanna"  ,initial:[["value",0],["dirAsc","N"],["ascRoot",0],["min",0],["max",1],["snap",1],["ascMode","additive"],["valueFxn",v=>v===1?"on":"off"]]};p.preBuild();
+	tAnchor = modHannaTAnchor;
+	p.shift("↑↑");
+	p.shift("→");
+	/***/elKERNPreO[_="durationHanna0"] = {partID:"KERN000005",title:"time-hanna"  ,initial:[["value",1000000],["dirAsc","N"],["ascRoot",0],["min",0],["max",3000000],["snap",100000],["ascMode","additive"],["valueFxn",v=>Math.floor(v/1000)+"ms"]]};p.preBuild();
+	
+	elKERNLinkA.push({from:"bubbleHanna0"  ,to:"gameframe0",portA:[[["value"],["modO_hannanos_ver1","bubbleF"  ]]]});
+	elKERNLinkA.push({from:"textHanna0"    ,to:"gameframe0",portA:[[["value"],["modO_hannanos_ver1","textF"    ]]]});
+	elKERNLinkA.push({from:"durationHanna0",to:"gameframe0",portA:[[["value"],["modO_hannanos_ver1","durationT"]]]});
 	
 	
 	

@@ -40,5 +40,4 @@ With the panel called something like "audio leeway", you can control how tightly
 If you have FtB575 /edit/ loaded and you save it through your web browser [probably "File>Save Page As..."], you should be able to load it whenever you want and play it mostly without issues. /edit/ should be able to operate without server connectivity.  
   
 **What changed from the previous build to this build:**  
-• absolutely nothing related to /edit/  
-• /simple/ provides a traditional web-interface for viewing, creating, editing, and deleting data of FtB575, such as "chart"s and "user"s  
+• hannanos's mod in /edit/ (seeing hit errors)  

@@ -18,8 +18,8 @@ require_once("specific.php");
 // THIS INFORMATION MUST BE CHANGED BEFORE RELEASING
 function ROOT(){ // PHP and globals smh
 	$ROOT = [
-		"STABLE_F"  => T,
-		"VERSION"   => 2,
+		"STABLE_F"  => F,
+		"VERSION"   => 4,
 	];
 	$ROOT["DIR_WEBROOT"     ] = "/home/ftbsliceofcake2/feelthebeats.se/";
 	$ROOT["EXT_WEBROOT"     ] = "/";

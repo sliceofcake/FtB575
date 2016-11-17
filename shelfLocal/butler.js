@@ -1291,6 +1291,12 @@ var π = {
 };
 
 // they told me not to, but I did it anyway
+// make this faster
+Array.prototype.makeUnique = function(){
+	var res = [];
+	for (var I = 0,C = this.length; I < C; I++){
+		res.pushUnique(this[I]);}
+	return res;};
 Array.prototype.pushUnique = function(el){if (!this.includes(el)){this.push(el);}};
 Array.prototype.pushUniqueA = function(elA){elA.forEach(el=>{this.pushUnique(el);});}; // !!! make this faster
 Array.prototype.sum = function(){return this.reduce(((p,v)=>p+v),0);};
@@ -1311,6 +1317,13 @@ Array.prototype.map = function(fxn){
 	var length = this.length;
 	for (var i = 0; i < length; i++){
 		res[i] = fxn(this[i],i,this);}
+	return res;};
+Array.prototype.mapFilter = function(fxn,vBlank=U){
+	var res = [];
+	var length = this.length;
+	for (var i = 0; i < length; i++){var v = fxn(this[i],i,this);
+		if (v !== vBlank){
+			res.push(v);}}
 	return res;};
 Array.prototype.mapReverse = function(fxn){
 	var res = new Array(this.length);
@@ -1843,6 +1856,13 @@ var anipnt = {
 		ctx.rect(x*pxd,y*pxd,width*pxd,height*pxd);
 		//ctx.closePath();
 		ctx.fill();},
+	traceRect : function(ctx,x,y,width,height,color,pxd=1){
+		if (ctx.strokeStyle !== color){ // !!! theory that this actually hurts performance
+			ctx.strokeStyle =   color;}
+		ctx.beginPath();
+		ctx.rect(x*pxd,y*pxd,width*pxd,height*pxd);
+		//ctx.closePath();
+		ctx.stroke();},
 	drawCirc : function(ctx,x,y,diameter,color,pxd=1){
 		if (ctx.fillStyle !== color){ // !!! theory that this actually hurts performance
 			ctx.fillStyle =   color;}
@@ -1865,11 +1885,14 @@ var anipnt = {
 		ctx.stroke();},
 	drawRay  : function(ctx,x,y,angle,l,w,color,lineCap="butt",pxd=1){this.drawLine(ctx,x,y,x+Math.cos(angle)*l,y-Math.sin(angle)*l,w,color,lineCap,pxd);},
 	fillText : function(ctx,s,x,y,color,pxd=1){
+		textBaseline_FREEZE = ctx.textBaseline;
+		ctx.textBaseline = "top";
 		font_FREEZE = ctx.font;
 		ctx.font = ctx.font.replace(/(\d+)px/,(match,p1,offset,string)=>(num(p1)*2)+"px"); // not great, but hey--
 		if (ctx.fillStyle !== color){ // !!! theory that this actually hurts performance
 			ctx.fillStyle =   color;}
 		ctx.fillText(s,x*pxd,y*pxd);
+		ctx.textBaseline = textBaseline_FREEZE;
 		ctx.font = font_FREEZE;},
 };
 

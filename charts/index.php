@@ -9,6 +9,7 @@
 <script><? require_once("../shelfLocal/KERN4/KERN000019.js"); ?></script>
 <script><? require_once("../shelfLocal/KERN4/KERN000020.js"); ?></script>
 <script><? require_once("../shelfLocal/KERN4/KERN000022.js"); ?></script>
+<script><? require_once("../shelfLocal/KERN4/KERN000023.js"); ?></script>
 <script>
 core.socketO["MU"]["pre"] = function(o){
 	var tFxn = (t,tt)=>Math.ceil(tt-t);

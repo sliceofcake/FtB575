@@ -45,7 +45,7 @@ function DBM_VT_FILTERED($tbl,$act){global $DBM_VT_COMPLETE;
 // L> these are properties accepted by the mu core, not necessarily matching the database ["user" accepts "password", even though that gets converted to "hash" in logic]
 // L> yet, for the most part, they should mirror the database
 $DESCRIPTION_PARTIAL = [
-	"hue"        => "0 ≤ x ≤ 1000, resembles a rainbow stretched from 0 red, 30 orange, 60 yellow, 90-150 green, 180 cyan, 210-240 blue, 270 purple, 300 pink, wraps to 1000 red, same as 0 red",
+	"hue"        => "0 ≤ x ≤ 1000, resembles a rainbow stretched from 0 red, 83 orange, 167 yellow, 250-417 green, 500 cyan, 583-667 blue, 750 purple, 833 pink, wraps to 1000 red, same as 0 red",
 	"saturation" => "0 ≤ x ≤ 1000, lower is more faded and washed out",
 	"lightness"  => "0 ≤ x ≤ 1000, 500 is normal, lower is toward black, higher is toward white",
 	"opacity"    => "0 ≤ x ≤ 1000, 1000 is solid, lower is toward transparent",
