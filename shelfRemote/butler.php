@@ -1,6 +1,8 @@
 <?
 require_once("/home/ftbsliceofcake2/gate/gate_575.php");
 
+// PHP uses "copy-on-write", which will reference until a change to the variable, THEN it will duplicate it
+
 define("T",TRUE);
 define("F",FALSE);
 define("N",NULL);
@@ -22,6 +24,9 @@ function isA($m){return is_array($m);}
 function isNumStr($m){return is_string($m) && is_numeric($m);}
 function isBoringS($m){return is_string($m)&&mb_ereg_match('^[a-zA-Z0-9_]*$',$m);} // for some reason, this doesn't want surrounding slashes
 function isFxn($m){return is_callable($m);}
+
+function kInA($k,$a){return array_key_exists($k,$a);}
+function vInA($v,$a){return in_array($v,$a,T);}
 
 $RETURN_MSG = "";
 function GET_RETURN_MSG(  ){global $RETURN_MSG;return $RETURN_MSG;}
@@ -46,16 +51,39 @@ function π_map(&$vA,$fxn){
 	for ($kA = array_keys($vA),$kAI = 0,$kAC = count($kA); $kAI < $kAC; $kAI++){$k = $kA[$kAI];$v = &$vA[$k];
 		$res[$k] = $fxn($v,$k,$vA);}
 	return $res;}
+function π_mapFilter(&$vA,$fxn,$vBlank=F){
+	$res = [];
+	$traditionalF = T;
+	for ($kA = array_keys($vA),$kAI = 0,$kAC = count($kA); $kAI < $kAC; $kAI++){$k = $kA[$kAI];
+		if ($k !== $kAI){
+			$traditionalF = F;
+			break;}}
+	for ($kA = array_keys($vA),$kAI = 0,$kAC = count($kA); $kAI < $kAC; $kAI++){$k = $kA[$kAI];$v = &$vA[$k];
+		$vv = $fxn($v,$k,$vA);
+		if ($vv !== $vBlank){
+			if ($traditionalF){
+				$res[] = $vv;}
+			else{
+				$res[$k] = $vv;}}}
+	return $res;}
 function π_reduce(&$vA,$fxn,$accumulator=N){ // cannot start accumulator to N on purpose, because this will treat that as not-set
 	for ($kA = array_keys($vA),$kAI = 0,$kAC = count($kA); $kAI < $kAC; $kAI++){$k = $kA[$kAI];$v = &$vA[$k];
 		if ($kAI === 0 && $accumulator === N){$accumulator = $v;continue;}
 		$accumulator = $fxn($accumulator,$v,$k,$vA);}
 	return $accumulator;}
-function π_filter(&$vA,$fxn){
+function π_filter(&$vA,$fxn){ // !!! here for numbered arrays redo the keys
 	$res = [];
+	$traditionalF = T;
+	for ($kA = array_keys($vA),$kAI = 0,$kAC = count($kA); $kAI < $kAC; $kAI++){$k = $kA[$kAI];
+		if ($k !== $kAI){
+			$traditionalF = F;
+			break;}}
 	for ($kA = array_keys($vA),$kAI = 0,$kAC = count($kA); $kAI < $kAC; $kAI++){$k = $kA[$kAI];$v = &$vA[$k];
 		if ($fxn($v,$k,$vA)){
-			$res[$k] = $v;}}
+			if ($traditionalF){
+				$res[] = $v;}
+			else{
+				$res[$k] = $v;}}}
 	return $res;}
 function π_find(&$vA,$fxn){
 	$res = [];
@@ -83,6 +111,51 @@ function π_calcFileExtensionProvided($filenameS){
 	$extension = mb_substr($filenameS,$posN);
 	if (!in_array($extension,FILE_EXTENSION_WHITELIST(),T)){return "";}
 	return $extension;}
+//
+function π_pathToContentType($pathS){
+	$posN = mb_strrpos($pathS,"/");
+	if ($posN === F){
+		$filenameS = $pathS;}
+	else{
+		$filenameS = mb_substr($pathS,$posN);}
+	switch (π_calcFileExtensionProvided($filenameS)){default:return "text/plain";
+		break;case ".jpg":case ".jpeg":return "image/jpg";
+		break;case ".png":return "image/png";
+		break;case ".gif":return "image/gif";
+		break;case ".txt":return "text/plain";
+		break;case ".osu":return "text/plain";}}
+//
+function calcDBPath($internalOrExternalS,$tbl,$propertyS,$ID,$extension){
+	if (!vInA($tbl,DB::$tblWhitelist)){return F;}
+	if (!isBoringS($propertyS)){return F;}
+	if (!isI($ID)){return F;}
+	if (!vInA($extension,FILE_EXTENSION_WHITELIST())){return F;}
+	switch ($internalOrExternalS){default:return F;
+		break;case "internal":
+			$root = ROOT()["DIR_FILE"];
+			$path = $root.$tbl."/".$propertyS."/".str($ID).$extension;
+			if (!isPathAboveBasePath($path,$root)){return F;} // the final gate of correctness
+			return $path;
+		break;case "external":
+			$root = ROOT()["EXT_FILE"];
+			$path = $root."?tbl=".$tbl."&propertyS=".$propertyS."&ID=".str($ID)."&extension=".$extension;
+			; // no correctness checking, since the path is external, every possibility is considered safe
+			return $path;}}
+// returns a F fallback if any issue occurs - used like this : "if this returns true, it's safe to proceed, otherwise fail"
+function isPathAboveBasePath($path,$pathBase){
+	// !!! realpath() doesn't work on non-existent files, unfortunately. I'm not comfortable writing my own right now, so fail on dots
+	if (preg_match('/^\./' ,$path    ) === 1){return F;} // starts with dot
+	if (preg_match('/^\./' ,$pathBase) === 1){return F;} // starts with dot
+	if (preg_match('/\.$/' ,$path    ) === 1){return F;} // ends with dot
+	if (preg_match('/\.$/' ,$pathBase) === 1){return F;} // ends with dot
+	if (preg_match('/\/\./',$path    ) === 1){return F;} // dot hugs start of slash
+	if (preg_match('/\/\./',$pathBase) === 1){return F;} // dot hugs start of slash
+	if (preg_match('/\.\//',$path    ) === 1){return F;} // dot hugs end of slash
+	if (preg_match('/\.\//',$pathBase) === 1){return F;} // dot hugs end of slash
+	//$path     = realpath($path    );if ($path     === F){return F;}
+	//$pathBase = realpath($pathBase);if ($pathBase === F){return F;}
+	if (mb_strlen($path) < mb_strlen($pathBase)){return F;} // not long enough so it can't possibly match [to avoid any possible issues with substr overflow]
+	return mb_substr($path,0,mb_strlen($pathBase)) === $pathBase;}
 // carbon copy [deep copy]
 // "Why do you need carbon copy in PHP? I thought PHP had array assignment by copy!"
 // 2 November 2016 - hit an extremely bizarre case where PHP array copies are not by assignment.
@@ -112,7 +185,37 @@ function K_genChannelName(){
 
 
 
-
+function rmComplete($basename,$firstRunF=T){
+	if ($firstRunF){
+		clearstatcache();} // for is_dir and is_file
+	if (mb_substr($basename,mb_strlen($basename)-1,1) === "/"){
+		$basename = mb_substr($basename,0,mb_strlen($basename)-1);}
+	if (is_dir($basename)){
+		$filenameA = @scandir($basename);if ($filenameA === F){return F;}
+		foreach ($filenameA as $filename){
+			if ($filename !== "." && $filename !== ".."){
+				$status = rmComplete($basename."/".$filename,F);if ($status === F){return F;}}}
+		$status = @rmdir($basename);if ($status === F){return F;}
+		return T;}
+	else if (is_file($basename)){
+		$status = @unlink($basename);if ($status === F){return F;}
+		return T;}
+	return F;}
+// ! untested
+function cpComplete($src,$dst){return;
+	$res = T;
+	$dir = @opendir($src);if ($dir === F){return F;}
+	$status = @mkdir($dst,0755);if ($status === F){return F;}
+	while(($file = readdir($dir)) !== F){
+		if ($file !== "." && $file !== ".."){
+			if (@is_dir($src."/".$file)){
+				$status = cpComplete($src."/".$file,$dst."/".$file);
+				$res = $res && $status;}
+			else if (@is_file($src."/".$file)){
+				$status = copy($src."/".$file,$dst."/".$file);if ($status === F){return F;}}
+			else{return F;}}}
+	closedir($dir);
+	return $res;}
 
 
 

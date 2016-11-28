@@ -3,10 +3,10 @@ require_once("/home/ftbsliceofcake2/gate/gate_575.php");
 
 mb_internal_encoding("UTF-8");
 require_once("butler.php");
-require_once("mysql.php");
+//require_once("mysql.php");
+require_once("db.php");
 require_once("specific.php");
 require_once("librarian.php");
-require_once("muValidation.php");
 
 //======================================================================================================================
 // MU
@@ -15,6 +15,7 @@ function MU_process($in){
 	if (!isA($in)){return N;}
 	foreach ($in as $row){
 		if (!isA($row)){return N;}}
+	DB::verifyFileStructure();
 	$responseA = π_map($in,function($row){return MU_processSub($row,$in);});
 	$eTime = π_now();
 	π_forEach($responseA,function(&$row)use($bTime,$eTime){π_aaa($row,["b"=>$bTime,"e"=>$eTime]);});
@@ -66,20 +67,22 @@ function MU_processSub($row,&$in){
 		"e"   =>         0 ,
 		"f"   =>         0];
 	
+	// !!! implement db write locks so that this validUserF flag stays constant
 	// if the user is claiming to be someone, verify it
-	if ($row["who"] !== 0){
-		// !!! implement db write locks so that this validUserF flag stays constant
-		$plushieEA = db_qrra("SELECT hashS,t0,tEnd FROM user_plushie WHERE userID='".esc($row["who"])."'");
-		$validUserClaimF = π_some($plushieEA,function($v)use($row){
-			return (π_now() < $v["tEnd"] && pluVerify($row["plu"],$v["hashS"]));});
-		//ll("v");
-		//ll($plushieEA);
-		if ($validUserClaimF){
-			$GLOBALS["userID"] = $row["who"];}
-		else{
-			π_aaa($o,[
-				"sta"=>-1002,
-				"msg"=>"bad authentication plushie",]);}}
+	for ($successF = F; $successF === F; $successF = T){
+		if ($row["who"] !== 0){
+			$userE = DB::get("user",$row["who"]);
+			if ($userE === F){π_aaa($o,["sta"=>-1001,"msg"=>"invalid userID claim"]);break;}
+			if (!kInA("plushieA",$userE)){π_aaa($o,["sta"=>-1001,"msg"=>"no plushie assigned"]);break;}
+			$plushieEA = $userE["plushieA"];
+			$matchF = F;
+			foreach ($plushieEA as $plushieE){
+				if (!kInA("hashS",$plushieE)){continue;} // not enough info
+				if (kInA("tEnd",$plushieE) && $plushieE["tEnd"] <= π_now()){continue;} // tEnd specified, and this has expired [!!! do something with it [when to delete it]]
+				if (!pluVerify($row["plu"],$plushieE["hashS"])){continue;} // hashS specified, and this doesn't match
+				$matchF = T;}
+			if (!$matchF){π_aaa($o,["sta"=>-1001,"msg"=>"bad authentication plushie"]);break;}
+			$GLOBALS["userID"] = $row["who"];}}
 	
 	if ($o["sta"] > 0){
 		$returnF = MU_fxn($row,$o,$in);
@@ -98,154 +101,232 @@ function MU_fxn(&$p,&$o,&$in){global $MU_TABLE;
 	$d = &$p["dat"];
 	$f = &$p["flO"];
 	if (in_array($p["act"],["get","new","edt","del","dmp"],T)){
-		if (!in_array($p["tbl"],DB_TABLE_ARR(),T)){SET_RETURN_MSG("ERROR : INVALID TBL");return F;}
-		$returnF = DBM_VT($p);
-		if (!$returnF){return F;}
+		if (!vInA($p["tbl"],DB::$tblWhitelist)){SET_RETURN_MSG("ERROR : INVALID TBL");return F;}
+		if (!kInA($p["tbl"],DBM_VT_COMPLETE())){SET_RETURN_MSG("tbl not found");return F;}
 		switch ($p["act"]){default:;
 			
 			//---- DMP ----
 			break;case "dmp":
+				$vt = [];
+				$statusF = vc6($p,$vt);if ($statusF === F){return F;}
+				//....
 				// !!! a debatable tradeoff - incredible performance boost for an esoteric stance on security that holds that "any unauthorized information can be important in the worst situation" 
-				$o["dat"]["IDA"] = db_qra("SELECT ID FROM ".$p["tbl"]." ORDER BY ID ASC"); // !!! HERE returning false...why? db not connected?
+				$o["dat"]["_IDA"] = DB::dmp($p["tbl"]);
 			
 			//---- GET ----
 			break;case "get":
+				$vt = ["_IDA" => ["type"=>"intarr","minC"=>1,"maxC"=>1000,"min"=>DB::$IDMin,"max"=>DB::$IDMax,"requiredNow"=>T,"help"=>"The unique IDs of the desired entities."],];
+				$statusF = vc6($p,$vt);if ($statusF === F){return F;}
+				//....
 				switch ($p["tbl"]){default:;
-					break;case "chart"       :;
-					break;case "user"        :;
-					break;case "user_plushie":;
+					break;case "board"     :;
+					break;case "subboard"  :;
+					break;case "thread"    :;
+					break;case "threadView":;
+					break;case "post"      :;
+					
+					break;case "chart"     :;
+					break;case "tag"       :;
+					break;case "favorite"  :;
+					
+					break;case "user"      :;
 				}
 				//....
-				$o["dat"][$p["tbl"]] = D_qsA($p["tbl"],$d["IDA"],$d["_exrelA"]);
+				$o["dat"][$p["tbl"]] = π_mapFilter($d["_IDA"],function($ID)use(&$p){return DB::get($p["tbl"],$ID);},F);
 				//....
 				switch ($p["tbl"]){default:;
-					break;case "chart"       :
-					break;case "user"        :
-						foreach ($o["dat"][$p["tbl"]] as &$userE){$userID = $userE["ID"];
-							unset($userE["hashS"]);
+					break;case "board"     :;
+					break;case "subboard"  :;
+					break;case "thread"    :;
+					break;case "threadView":
+						$o["dat"][$p["tbl"]] = π_filter($o["dat"][$p["tbl"]],function($E){return kinA("_userID",$E) && $E["_userID"] === DBM_UID();});
+					break;case "post"      :;
+					
+					break;case "chart"     :;
+					break;case "tag"       :;
+					break;case "favorite"  :
+						$o["dat"][$p["tbl"]] = π_filter($o["dat"][$p["tbl"]],function($E){return kinA("_userID",$E) && $E["_userID"] === DBM_UID();});
+					
+					break;case "user"      :
+						foreach ($o["dat"][$p["tbl"]] as &$E){$userID = $E["_ID"];
+							unset($E["hashS"]);
 							if ($userID !== DBM_UID()){
-								unset($userE["netqN"]);
-								unset($userE["t1"]);}} // !!! maybe friends should have access to t1
-					break;case "user_plushie":
-						foreach ($o["dat"][$p["tbl"]] as &$user_plushieE){$user_plushieID = $user_plushieE["ID"];
-							if ($user_plushieE["userID"] !== DBM_UID()){
-								unset($o["dat"][$p["tbl"]][$user_plushieID]);}}
+								unset($E["netqN"]);
+								unset($E["t1"]);
+								unset($E["plushieA"]);}} // !!! maybe friends should have access to t1
 				}
 			
 			//---- NEW ----
 			break;case "new":
+				$vt = DBM_VT_COMPLETE()[$p["tbl"]];
+				foreach ($vt as $k=>$v){
+					$vt[$k]["requiredNow"] = $vt[$k]["required"];}
+				$statusF = vc6($p,$vt);if ($statusF === F){return F;}
+				//....
 				switch ($p["tbl"]){default:;
-					break;case "chart"       :
+					break;case "board"     :
+						if (!DBM_CLR(3)){SET_RETURN_MSG("ERROR : ACCESS DENIED");return F;}
+					break;case "subboard"  :
+						if (!DBM_CLR(3)){SET_RETURN_MSG("ERROR : ACCESS DENIED");return F;}
+					break;case "thread"    :
 						if (!DBM_SIU()){SET_RETURN_MSG("ERROR : ACCESS DENIED");return F;}
-						π_aaa($d,[
-							"userID"            => DBM_UID(),
-							"npsN_DERIVED"      => 0,
-							"formatS_DERIVED"   => "",
-							"laneC_DERIVED"     => 7,
-							"viewC_DERIVED"     => 0,
-							"favoriteC_DERIVED" => 0,
-						]);
-					break;case "user"        :
-						if (array_key_exists("passwordS",$d)){$d["hashS"] = pHash($d["passwordS"]);unset($d["passwordS"]);}
-					break;case "user_plushie":
-						SET_RETURN_MSG("ERROR : NO ONE HAS ACCESS TO THIS COMMAND");return F;
+						π_aaa($d,["_userIDA"=>[DBM_UID()]]);
+					break;case "threadView":
+						SET_RETURN_MSG("ERROR : TABLE NOT MANUALLY HANDLED");return F;
+					break;case "post"      :
+						if (!DBM_SIU()){SET_RETURN_MSG("ERROR : ACCESS DENIED");return F;}
+						π_aaa($d,["_userIDA"=>[DBM_UID()]]);
+					
+					break;case "chart"     :
+						if (!DBM_SIU()){SET_RETURN_MSG("ERROR : ACCESS DENIED");return F;}
+						π_aaa($d,["_userIDA"=>[DBM_UID()]]);
+					break;case "tag"       :
+						if (!DBM_CLR(3)){SET_RETURN_MSG("ERROR : ACCESS DENIED");return F;}
+					break;case "favorite"  :
+						if (!DBM_SIU()){SET_RETURN_MSG("ERROR : ACCESS DENIED");return F;}
+						π_aaa($d,["_userIDA"=>[DBM_UID()]]);
+					
+					break;case "user"      :
+						if (kInA("passwordS",$d)){
+							$d["hashS"] = pHash($d["passwordS"]);
+							unset($d["passwordS"]);}
 				}
 				//....
-				$insertID = D_qi($p["tbl"],$d);
-				if ($insertID === F){
-					SET_RETURN_MSG("ERROR : ".db_errInfo()." [ESOTERIC]");return F;}
-				foreach ($f as $filename=>$fileE){
-					// these parts are clean, but let's make sure
-					if (isS($fileE)){$extension = π_calcFileExtensionProvided($fileE);}
-					else            {$extension = π_calcFileExtensionProvided($fileE["name"]);}
-					if (!is_boring($p["tbl"])){SET_RETURN_MSG("ERROR : INVALID FILEPATH COMPONENT [ESOTERIC-1]");return F;}
-					if (!is_boring($filename)){SET_RETURN_MSG("ERROR : INVALID FILEPATH COMPONENT [ESOTERIC-2]");return F;}
-					if (!in_array($extension,FILE_EXTENSION_WHITELIST(),T)){SET_RETURN_MSG("ERROR : INVALID FILEPATH COMPONENT [ESOTERIC-3]");return F;}
-					if (!isI($insertID)){SET_RETURN_MSG("ERROR : INVALID FILEPATH COMPONENT [ESOTERIC-4]");return F;}
-					$dst = ROOT()["DIR_FILE"].$p["tbl"]."/".$filename."_".str($insertID).$extension;
-					//chmod(ROOT()["DIR_FILE"].$p["tbl"]."/",0755);
-					if (isS($fileE)){
-						if (is_path_breaker($fileE)){SET_RETURN_MSG("ERROR : INVALID FILEPATH COMPONENT [ESOTERIC-5]");return F;}
-						copy(ROOT()["DIR_FILE_DEFAULT"].$fileE,$dst);}
-					else{
-						move_uploaded_file($fileE["tmp_name"],$dst);}
-					D_qu($p["tbl"],$insertID,[$filename."Extension_DERIVED"=>$extension]);}
-				$o["dat"][$p["tbl"]]["new"] = D_qs($p["tbl"],$insertID);
+				$d["t1"] = $d["t0"] = π_now();
+				$insertID = DB::new($p["tbl"],$d,$f);if ($insertID === F){SET_RETURN_MSG("ERROR : ".print_r(DB::$errA,T)." [ESOTERIC]");return F;}
+				$o["dat"][$p["tbl"]]["_ID"] = $insertID;
 				//....
 				switch ($p["tbl"]){default:;
-					break;case "chart"       :;
-					break;case "user"        :;
-					break;case "user_plushie":;
+					break;case "board"     :;
+					break;case "subboard"  :;
+					break;case "thread"    :;
+					break;case "threadView":;
+					break;case "post"      :;
+					
+					break;case "chart"     :;
+					break;case "tag"       :;
+					break;case "favorite"  :;
+					
+					break;case "user"      :;
 				}
 			
 			//---- EDT ----
 			break;case "edt":
+				$vt = DBM_VT_COMPLETE()[$p["tbl"]];
+				foreach ($vt as $k=>$v){
+					$vt[$k]["requiredNow"] = F;}
+				π_aaa($vt,["_ID" => ["type"=>"int","min"=>DB::$IDMin,"max"=>DB::$IDMax,"requiredNow"=>T,"help"=>"The unique ID of this entity."],]);
+				$statusF = vc6($p,$vt);if ($statusF === F){return F;}
+				//....
+				$E = DB::get($p["tbl"],$d["_ID"]);
+				if ($E === F){SET_RETURN_MSG("ERROR : specified database row [ID:'".esc($d["_ID"])."'] doesn't exist");return F;}
 				switch ($p["tbl"]){default:;
-					break;case "chart"       :;
-					break;case "user"        :;
-					break;case "user_plushie":
-						SET_RETURN_MSG("ERROR : NO ONE HAS ACCESS TO THIS COMMAND");return F;
+					break;case "board"     :
+						if (!DBM_CLR(3)){SET_RETURN_MSG("ERROR : ACCESS DENIED");return F;}
+					break;case "subboard"  :
+						if (!DBM_CLR(3)){SET_RETURN_MSG("ERROR : ACCESS DENIED");return F;}
+					break;case "thread"    :
+						if (!kInA("_userIDA",$E)){SET_RETURN_MSG("ERROR : LONE ROW");return F;}
+						if (!vInA(DBM_UID(),$E["_userIDA"])){SET_RETURN_MSG("ERROR : ACCESS DENIED");return F;}
+					break;case "threadView":
+						SET_RETURN_MSG("ERROR : TABLE NOT MANUALLY HANDLED");return F;
+					break;case "post"      :
+						if (!kInA("_userIDA",$E)){SET_RETURN_MSG("ERROR : LONE ROW");return F;}
+						if (!vInA(DBM_UID(),$E["_userIDA"])){SET_RETURN_MSG("ERROR : ACCESS DENIED");return F;}
+					
+					break;case "chart"     :
+						if (!kInA("_userIDA",$E)){SET_RETURN_MSG("ERROR : LONE ROW");return F;}
+						if (!vInA(DBM_UID(),$E["_userIDA"])){SET_RETURN_MSG("ERROR : ACCESS DENIED");return F;}
+					break;case "tag"       :
+						if (!DBM_CLR(3)){SET_RETURN_MSG("ERROR : ACCESS DENIED");return F;}
+					break;case "favorite"  :
+						if (!kInA("_userIDA",$E)){SET_RETURN_MSG("ERROR : LONE ROW");return F;}
+						if (!vInA(DBM_UID(),$E["_userIDA"])){SET_RETURN_MSG("ERROR : ACCESS DENIED");return F;}
+					
+					break;case "user"      :
+						if (!kInA("_ID",$E)){SET_RETURN_MSG("ERROR : PANIC");return F;}
+						if (DBM_UID() !== $E["_ID"]){SET_RETURN_MSG("ERROR : ACCESS DENIED");return F;}
 				}
 				//....
-				if (!db_rowExists("FROM ".$p["tbl"]." WHERE ID='".esc($d["ID"])."'")){SET_RETURN_MSG("ERROR : specified database row [ID:'".esc($d["ID"])."'] doesn't exist");return F;}
-				$o["dat"][$p["tbl"]]["old"] = D_qs($p["tbl"],$d["ID"]);
-				// you have to own it
-				switch ($p["tbl"]){default:;
-					break;case "chart"       :
-						if ($o["dat"][$p["tbl"]]["old"]["userID"] !== DBM_UID()){
-							SET_RETURN_MSG("ERROR : ACCESS DENIED");return F;}
-					break;case "user"        :
-						if ($o["dat"][$p["tbl"]]["old"]["userID"] !== DBM_UID()){
-							SET_RETURN_MSG("ERROR : ACCESS DENIED");return F;}
-					break;case "user_plushie":
-						if ($o["dat"][$p["tbl"]]["old"]["userID"] !== DBM_UID()){
-							SET_RETURN_MSG("ERROR : ACCESS DENIED");return F;}
-				}
-				//....
-				$propertyA = $d;unset($propertyA["ID"]); // copy $d, without the ID property
-				D_qu($p["tbl"],$d["ID"],$propertyA);
+				$d["t1"] = π_now();
+				$dd = π_cc($d);unset($dd["_ID"]); // copy $d, without the ID property
+				DB::edt($p["tbl"],$d["_ID"],$dd);
 				foreach ($f as $filename=>$fileE){
+					DB::calcPathFil($p["tbl"],$d["_ID"],$filename);
 					// these parts are clean, but let's make sure
 					$extension = π_calcFileExtensionProvided($fileE["name"]);
 					if (!is_boring($p["tbl"])){SET_RETURN_MSG("ERROR : INVALID FILEPATH COMPONENT [ESOTERIC-1]");return F;}
 					if (!is_boring($filename)){SET_RETURN_MSG("ERROR : INVALID FILEPATH COMPONENT [ESOTERIC-2]");return F;}
 					if (!in_array($extension,FILE_EXTENSION_WHITELIST(),T)){SET_RETURN_MSG("ERROR : INVALID FILEPATH COMPONENT [ESOTERIC-3]");return F;}
-					if (!isI($d["ID"])){SET_RETURN_MSG("ERROR : INVALID FILEPATH COMPONENT [ESOTERIC-4]");return F;}
-					$dst = ROOT()["DIR_FILE"].$p["tbl"]."/".$filename."_".str($d["ID"]).$extension;
+					if (!isI($d["_ID"])){SET_RETURN_MSG("ERROR : INVALID FILEPATH COMPONENT [ESOTERIC-4]");return F;}
+					$dst = ROOT()["DIR_FILE"]."/".$p["tbl"]."/".$filename."/".str($d["_ID"]).$extension;
 					move_uploaded_file($fileE["tmp_name"],$dst);
-					D_qu($p["tbl"],$d["ID"],[$filename."Extension_DERIVED"=>$extension]);}
-				$o["dat"][$p["tbl"]]["new"] = D_qs($p["tbl"],$d["ID"]);
+					DB::edt($p["tbl"],$d["_ID"],[$filename."Extension_DERIVED"=>$extension]);}
 				//....
 				switch ($p["tbl"]){default:;
-					break;case "chart"       :;
-					break;case "user"        :;
-					break;case "user_plushie":;
+					break;case "board"     :;
+					break;case "subboard"  :;
+					break;case "thread"    :;
+					break;case "threadView":;
+					break;case "post"      :;
+					
+					break;case "chart"     :;
+					break;case "tag"       :;
+					break;case "favorite"  :;
+					
+					break;case "user"      :;
 				}
 			
 			//---- DEL ----
 			break;case "del":
+				$vt = ["_ID" => ["type"=>"int","min"=>DB::$IDMin,"max"=>DB::$IDMax,"requiredNow"=>T,"help"=>"The unique ID of this entity."],];
+				$statusF = vc6($p,$vt);if ($statusF === F){return F;}
+				//....
+				$E = DB::get($p["tbl"],$d["_ID"]);
+				if ($E === F){SET_RETURN_MSG("ERROR : specified database row [ID:'".esc($d["_ID"])."'] doesn't exist");return F;}
 				switch ($p["tbl"]){default:;
-					break;case "chart"       :;
-					break;case "user"        :;
-					break;case "user_plushie":;
+					break;case "board"     :
+						if (!DBM_CLR(3)){SET_RETURN_MSG("ERROR : ACCESS DENIED");return F;}
+					break;case "subboard"  :
+						if (!DBM_CLR(3)){SET_RETURN_MSG("ERROR : ACCESS DENIED");return F;}
+					break;case "thread"    :
+						if (!kInA("_userIDA",$E)){SET_RETURN_MSG("ERROR : LONE ROW");return F;}
+						if (!vInA(DBM_UID(),$E["_userIDA"])){SET_RETURN_MSG("ERROR : ACCESS DENIED");return F;}
+					break;case "threadView":
+						SET_RETURN_MSG("ERROR : TABLE NOT MANUALLY HANDLED");return F;
+					break;case "post"      :
+						if (!kInA("_userIDA",$E)){SET_RETURN_MSG("ERROR : LONE ROW");return F;}
+						if (!vInA(DBM_UID(),$E["_userIDA"])){SET_RETURN_MSG("ERROR : ACCESS DENIED");return F;}
+					
+					break;case "chart"     :
+						if (!kInA("_userIDA",$E)){SET_RETURN_MSG("ERROR : LONE ROW");return F;}
+						if (!vInA(DBM_UID(),$E["_userIDA"])){SET_RETURN_MSG("ERROR : ACCESS DENIED");return F;}
+					break;case "tag"       :
+						if (!DBM_CLR(3)){SET_RETURN_MSG("ERROR : ACCESS DENIED");return F;}
+					break;case "favorite"  :
+						if (!kInA("_userIDA",$E)){SET_RETURN_MSG("ERROR : LONE ROW");return F;}
+						if (!vInA(DBM_UID(),$E["_userIDA"])){SET_RETURN_MSG("ERROR : ACCESS DENIED");return F;}
+					
+					break;case "user"      :
+						if (!kInA("_ID",$E)){SET_RETURN_MSG("ERROR : PANIC");return F;}
+						if (DBM_UID() !== $E["_ID"]){SET_RETURN_MSG("ERROR : ACCESS DENIED");return F;}
 				}
 				//....
-				$o["dat"][$p["tbl"]]["old"] = D_qs($p["tbl"],$d["ID"]);
-				if ($o["dat"][$p["tbl"]]["old"] === F){SET_RETURN_MSG("ERROR : SPECIFIED ENTITY DOESN'T EXIST");return F;}
-				// you have to own it
-				switch ($p["tbl"]){default:;
-					break;case "chart"       :
-						if ($o["dat"][$p["tbl"]]["old"]["userID"] !== DBM_UID()){
-							SET_RETURN_MSG("ERROR : ACCESS DENIED");return F;}
-					break;case "user"        :
-						if ($o["dat"][$p["tbl"]]["old"]["ID"] !== DBM_UID()){
-							SET_RETURN_MSG("ERROR : ACCESS DENIED");return F;}
-					break;case "user_plushie":
-						if ($o["dat"][$p["tbl"]]["old"]["userID"] !== DBM_UID()){
-							SET_RETURN_MSG("ERROR : ACCESS DENIED");return F;}
-				}
+				DB::del($p["tbl"],$d["_ID"]);
 				//....
-				D_qd($p["tbl"],$d["ID"]);
+				switch ($p["tbl"]){default:;
+					break;case "board"     :;
+					break;case "subboard"  :;
+					break;case "thread"    :;
+					break;case "threadView":;
+					break;case "post"      :;
+					
+					break;case "chart"     :;
+					break;case "tag"       :;
+					break;case "favorite"  :;
+					
+					break;case "user"      :;
+				}
 		}
 		return T;}
 	else{
@@ -266,7 +347,7 @@ function DBM_recalc($tbl,$ID){
 	return T;}
 
 /**********************************************************************************************************************\
-* SPECIALIZED MU COMMANDS                                                                                             *
+* SPECIALIZED MU COMMANDS                                                                                              *
 \**********************************************************************************************************************/
 
 $MU_TABLE["n/a"]["KERN|clock"] = function(&$p,&$d,&$o){
@@ -296,52 +377,39 @@ $MU_TABLE["n/a"]["KERN|who_am_i"] = function(&$p,&$d,&$o){
 
 $MU_TABLE["n/a"]["FtB575_1|plushie_gen"] = function(&$p,&$d,&$o){
 	// attempt ID sign in
-	// !!! use π_cc() for all array copies - find π_cc in butler.php
-	$pCopy1=π_cc($p);
-	$pCopy2=π_cc($p);
+	$pCopy1 = π_cc($p);
+	$pCopy2 = π_cc($p);
 	$successF1 = vc6($pCopy1,[
-		"ID"        => ["type"=>"int","min"=>DB_ID_MIN(),"max"=>DB_ID_MAX()],
-		"passwordS" => ["type"=>"str","max"=>DB_PASSWORD_LENGTH_MAX()],]);
+		"_ID"       => ["type"=>"int","min"=>DB::$IDMin,"max"=>DB::$IDMax,"requiredNow"=>T,"help"=>"Your userID."],
+		"passwordS" => ["type"=>"str","max"=>DB_PASSWORD_LENGTH_MAX(),"requiredNow"=>T,"help"=>"Your password."],]);
 	$successF2 = vc6($pCopy2,[
-		"nameS"     => ["type"=>"str","max"=>DB_USERNAME_LENGTH_MAX()],
-		"passwordS" => ["type"=>"str","max"=>DB_PASSWORD_LENGTH_MAX()],]);
+		"nameS"     => ["type"=>"str","max"=>DB_USERNAME_LENGTH_MAX(),"requiredNow"=>T,"help"=>"Your username."],
+		"passwordS" => ["type"=>"str","max"=>DB_PASSWORD_LENGTH_MAX(),"requiredNow"=>T,"help"=>"Your password."],]);
 	if ($successF1){
-		$row = D_qs("user",$pCopy1["dat"]["ID"]);
-		if ($row === F){SET_RETURN_MSG("ERROR : BAD AUTHENTICATION ID");return F;}
-		if (!pVerify($pCopy1["dat"]["passwordS"],$row["hashS"])){SET_RETURN_MSG("ERROR : BAD AUTHENTICATION PASSWORD");return F;}
-		$ID = $pCopy1["dat"]["ID"];}
+		$user = DB::get("user",$pCopy1["dat"]["_ID"]);if ($user === F){SET_RETURN_MSG("ERROR : BAD AUTHENTICATION ID");return F;}
+		if (!pVerify($pCopy1["dat"]["passwordS"],$user["hashS"])){SET_RETURN_MSG("ERROR : BAD AUTHENTICATION PASSWORD");return F;}
+		$ID = $pCopy1["dat"]["_ID"];}
 	// then attempt name sign in
 	else if ($successF2){
-		$userA = db_qrra("SELECT ID,hashS FROM user WHERE nameS='".esc($pCopy2["dat"]["nameS"])."'");
-		if ($userA === F || count($userA) === 0){SET_RETURN_MSG("ERROR : BAD AUTHENTICATION NAME");return F;}
-		$dCopy2 = &$pCopy2["dat"]; // because PHP syntax issues with function()use(&$_[""]){}
-		$user = π_find($userA,function($row)use(&$dCopy2){return pVerify($dCopy2["passwordS"],$row["hashS"]);});
-		if ($user === F){SET_RETURN_MSG("ERROR : BAD AUTHENTICATION PASSWORD");return F;}
-		$ID = $user["ID"];}
+		$userIDA = DB::dmp("user");
+		$userA = π_mapFilter($userIDA,function($userID)use($pCopy2){
+			$user = DB::get("user",$userID);if ($user === F){return F;}
+			if (!kInA("nameS",$user)){return F;}
+			if ($user["nameS"] !== $pCopy2["dat"]["nameS"]){return F;}
+			return $user;
+		},F);if (count($userA) === 0){SET_RETURN_MSG("ERROR : BAD AUTHENTICATION NAME");return F;}
+		$dCopy2 = &$pCopy2["dat"]; // because PHP syntax issues with function()use(&$_[$__]){}
+		$user = π_find($userA,function($row)use(&$dCopy2){return pVerify($dCopy2["passwordS"],$row["hashS"]);});if ($user === F){SET_RETURN_MSG("ERROR : BAD AUTHENTICATION PASSWORD");return F;}
+		$ID = $user["_ID"];}
 	else{return F;}
 	$plu = DBM_genPlushie();
 	$t = π_now();
-	$user_plushieID = D_qi("user_plushie",["hashS"=>pluHash($plu),"userID"=>$ID,"t0"=>$t,"t1"=>$t,"tEnd"=>$t+(28*24*60*60*1000*1000)]);
-	π_aaa($o["dat"],["ID"=>$ID,"plu"=>$plu,"user_plushieID"=>$user_plushieID]);
-	return T;
-};
-
-$MU_TABLE["n/a"]["FtB575_1|password_assert"] = function(&$p,&$d,&$o){
-	if (!DBM_SIU()){SET_RETURN_MSG("ERROR : NOT AUTHENTICATED");return F;}
-	$pCopy1=π_cc($p);
-	$successF1 = vc6($pCopy1,[
-		"password_oldS" => ["type"=>"str","max"=>DB_PASSWORD_LENGTH_MAX()],
-		"password_newS" => ["type"=>"str","max"=>DB_PASSWORD_LENGTH_MAX()],]);
-	if (!$successF1){return F;}
-	db_head();
-	$row = D_qs("user",DBM_UID(),[],T);
-	if ($row !== F){
-		D_qu("user",DBM_UID(),["hashS",pHash($d["password_newS"])]);}
-	db_tail();
-	return T;
-};
-
-$MU_TABLE["n/a"]["FtB575_1|chart_list"] = function(&$p,&$d,&$o){
-	$o["dat"]["chartIDA"] = db_qra("SELECT ID FROM chart ORDER BY ID ASC");
+	// !!! unlocked hail mary
+	$plushieA = kInA("plushieA",$user) ? $user["plushieA"] : [];
+	// while we have it open, do cleanup on old plushies
+	$plushieA = π_filter($plushieA,function($plushie){return kInA("tEnd",$plushie)&&$plushie["tEnd"]>π_now();}); // !!! esoteric : decide on what the equals case should do, and code it consistently
+	$plushieA[] = ["hashS"=>pluHash($plu),"t0"=>$t,"t1"=>$t,"tEnd"=>$t+(28*24*60*60*1000*1000)];
+	DB::edt("user",$ID,["plushieA"=>$plushieA]);
+	π_aaa($o["dat"],["_ID"=>$ID,"plu"=>$plu]);
 	return T;
 };

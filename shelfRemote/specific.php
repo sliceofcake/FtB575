@@ -2,7 +2,7 @@
 require_once("/home/ftbsliceofcake2/gate/gate_575.php");
 
 require_once("butler.php");
-require_once("mysql.php");
+//require_once("mysql.php");
 //----------------------------------------------------------------------------------------------------------------------
 // DATABASE-SPECIFIC TO FTB7
 // query UPDATE
@@ -123,6 +123,13 @@ function DBM_SIU(){
 	$res = (DBM_UID() >= 1);
 	if (!$res){SET_RETURN_MSG("anonymous");return F;}
 	return $res;}
+// does the current user have the given clearance level?
+// 0 - unknown user
+// 1 - signed in
+// 2 - staff member
+// 3 - division leader
+function DBM_CLR($starC){
+	return F;}
 // does ID exist in table?
 function DBM_validID($tbl,$ID){
 	if (!is_string($tbl)){return FALSE;}
@@ -259,4 +266,105 @@ function K_getImageFileExtension($filename){
 		case IMAGETYPE_JPEG:return ".jpg";
 		case IMAGETYPE_GIF:return ".gif";
 		default:return FALSE;}}
+
+
+
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// VC6 - Variable Cleanse Version 6
+// return whether input data comforms to normative set, with first issue message
+function vc6(&$p,$normative){
+	$dat = [];
+	$flO = [];
+	// remove extra data
+	//$p["dat"] = π_filter($p["dat"],function($v,$propertyS)use($normative){return kInA($propertyS,$normative)&&$normative[$propertyS]["type"]!=="fil";});
+	//$p["flO"] = π_filter($p["flO"],function($v,$propertyS)use($normative){return kInA($propertyS,$normative)&&$normative[$propertyS]["type"]==="fil";});
+	// verify normative template
+	foreach ($normative as $propertyS=>$rule){
+		if (!kInA("type"       ,$rule)){SET_RETURN_MSG("ERROR(VC6) : rule.type missing"    );return F;}
+		if (!kInA("requiredNow",$rule)){SET_RETURN_MSG("ERROR(VC6) : rule.required missing");return F;} // whether the property must be included, depending on the action
+		if (!kInA("required"   ,$rule)){$rule["required"] = $rule["requiredNow"];} // whether the property must always exist
+		if (!kInA("help"       ,$rule)){SET_RETURN_MSG("ERROR(VC6) : rule.help missing"    );return F;}
+		//----
+		switch ($rule["type"]){default:SET_RETURN_MSG("ERROR(VC6) : rule.type illegal value");return F;
+			break;case "int"   :
+			/***/;case "intarr":
+			/***/;case "str"   :
+			/***/;case "strarr":if (!kInA($propertyS,$p["dat"])){if ($rule["requiredNow"]){SET_RETURN_MSG("ERROR(VC6) : ".$propertyS." not defined");return F;}else{continue 2;}}
+			break;case "fil"   :if (!kInA($propertyS,$p["flO"])){if ($rule["requiredNow"]){SET_RETURN_MSG("ERROR(VC6) : ".$propertyS." not defined");return F;}else{continue 2;}}}
+		switch ($rule["type"]){default:SET_RETURN_MSG("ERROR(VC6) : rule.type illegal value");return F;
+			break;case "int"   :if (!vc6int   ($propertyS,$p["dat"][$propertyS],$rule)){return F;}
+			break;case "intarr":if (!vc6intarr($propertyS,$p["dat"][$propertyS],$rule)){return F;}
+			break;case "str"   :if (!vc6str   ($propertyS,$p["dat"][$propertyS],$rule)){return F;}
+			break;case "strarr":if (!vc6strarr($propertyS,$p["dat"][$propertyS],$rule)){return F;}
+			break;case "fil"   :if (!vc6fil   ($propertyS,$p["flO"][$propertyS],$rule)){return F;}}
+		switch ($rule["type"]){default:SET_RETURN_MSG("ERROR(VC6) : rule.type illegal value");return F;
+			break;case "int"   :
+			/***/;case "intarr":
+			/***/;case "str"   :
+			/***/;case "strarr":$dat[$propertyS] = $p["dat"][$propertyS];
+			break;case "fil"   :$flO[$propertyS] = $p["flO"][$propertyS];}}
+	$p["dat"] = $dat;
+	$p["flO"] = $flO;
+	return T;}
+function vc6fil($propertyS,$v,$rule){
+	if ($v["size"] === 0){ // dessert // !!! eventually change this to somehow be N-set, because a blank file should be valid
+		if (kInA("required",$rule) && $rule["required"]){
+			SET_RETURN_MSG("ERROR(VC6) : ".$propertyS." CANNOT BE REMOVED");return F;}
+		else{return T;}}
+	if (!isA($v)                                                     ){SET_RETURN_MSG("ERROR(VC6) : ".$propertyS.":".var_export($v,T)." NOT FIL"                                        );return F;}
+	if ($v["error"] !== 0                                            ){SET_RETURN_MSG("ERROR(VC6) : ".$propertyS.":".var_export($v,T)." RETURNED PHP ERROR CODE : ".$v["error"]         );return F;}
+	if (array_key_exists("min" ,$rule) && $v["size"] < $rule["min"]  ){SET_RETURN_MSG("ERROR(VC6) : ".$propertyS.":".var_export($v,T)." IS SMALLER THAN ".$rule["min"]." Bytes"         );return F;}
+	if (array_key_exists("max" ,$rule) && $v["size"] > $rule["max"]  ){SET_RETURN_MSG("ERROR(VC6) : ".$propertyS.":".var_export($v,T)." IS LARGER THAN ".$rule["max"]." Bytes"          );return F;}
+	if (array_key_exists("gate",$rule) && !$rule["gate"]($v)         ){SET_RETURN_MSG("ERROR(VC6) : ".$propertyS.":".var_export($v,T)." DID NOT PASS GATE FUNCTION"                     );return F;}
+	return T;}
+function vc6int($propertyS,$v,$rule){
+	if ($v === N){ // dessert
+		if (kInA("required",$rule) && $rule["required"]){
+			SET_RETURN_MSG("ERROR(VC6) : ".$propertyS." CANNOT BE REMOVED");return F;}
+		else{return T;}}
+	if (!isI($v)                                                     ){SET_RETURN_MSG("ERROR(VC6) : ".$propertyS.":".var_export($v,T)." NOT INT"                                        );return F;}
+	if (array_key_exists("min" ,$rule) && $v < $rule["min"]          ){SET_RETURN_MSG("ERROR(VC6) : ".$propertyS.":".var_export($v,T)." IS LESS THAN ".$rule["min"]                     );return F;}
+	if (array_key_exists("max" ,$rule) && $v > $rule["max"]          ){SET_RETURN_MSG("ERROR(VC6) : ".$propertyS.":".var_export($v,T)." IS GREATER THAN ".$rule["max"]                  );return F;}
+	if (array_key_exists("vA"  ,$rule) && !in_array($v,$rule["vA"],T)){SET_RETURN_MSG("ERROR(VC6) : ".$propertyS.":".var_export($v,T)." NOT A LEGAL VALUE FROM ".var_export($rule["vA"]));return F;}
+	if (array_key_exists("gate",$rule) && !$rule["gate"]($v)         ){SET_RETURN_MSG("ERROR(VC6) : ".$propertyS.":".var_export($v,T)." DID NOT PASS GATE FUNCTION"                     );return F;}
+	return T;}
+function vc6str($propertyS,$v,$rule){
+	if ($v === N){ // dessert
+		if (kInA("required",$rule) && $rule["required"]){
+			SET_RETURN_MSG("ERROR(VC6) : ".$propertyS." CANNOT BE REMOVED");return F;}
+		else{return T;}}
+	if (!isS($v)                                                      ){SET_RETURN_MSG("ERROR(VC6) : ".$propertyS.":".var_export($v,T)." NOT STR"                                        );return F;}
+	if (array_key_exists("min" ,$rule) && mb_strlen($v) < $rule["min"]){SET_RETURN_MSG("ERROR(VC6) : ".$propertyS.":".var_export($v,T)." IS SHORTER THAN ".$rule["min"]                  );return F;}
+	if (array_key_exists("max" ,$rule) && mb_strlen($v) > $rule["max"]){SET_RETURN_MSG("ERROR(VC6) : ".$propertyS.":".var_export($v,T)." IS LONGER THAN ".$rule["max"]                   );return F;}
+	if (array_key_exists("vA"  ,$rule) && !in_array($v,$rule["vA"],T) ){SET_RETURN_MSG("ERROR(VC6) : ".$propertyS.":".var_export($v,T)." NOT A LEGAL VALUE FROM ".var_export($rule["vA"]));return F;}
+	if (array_key_exists("gate",$rule) && !$rule["gate"]($v)          ){SET_RETURN_MSG("ERROR(VC6) : ".$propertyS.":".var_export($v,T)." DID NOT PASS GATE FUNCTION"                     );return F;}
+	return T;}
+function vc6intarr($propertyS,$v,$rule){
+	if ($v === N){ // dessert
+		if (kInA("required",$rule) && $rule["required"]){
+			SET_RETURN_MSG("ERROR(VC6) : ".$propertyS." CANNOT BE REMOVED");return F;}
+		else{return T;}}
+	if (!isA($v)                                                   ){SET_RETURN_MSG("ERROR(VC6) : ".$propertyS.":".var_export($v,T)." NOT ARR"                                                                          );return F;}
+	if (array_key_exists("minC",$rule) && count($v) < $rule["minC"]){SET_RETURN_MSG("ERROR(VC6) : ".$propertyS.":".var_export($v,T)." HAS TOO FEW ELEMENTS - ".count($v)." WHEN AT LEAST ".$rule["minC"]." REQUIRED"    );return F;}
+	if (array_key_exists("maxC",$rule) && count($v) > $rule["maxC"]){SET_RETURN_MSG("ERROR(VC6) : ".$propertyS.":".var_export($v,T)." HAS TOO MANY ELEMENTS - ".count($v)." WHEN NO MORE THAN ".$rule["maxC"]." ALLOWED");return F;}
+	foreach ($v as $propertyS_sub=>$v_sub){
+		if (!vc6int($propertyS_sub,$v_sub,$rule)){return F;}}
+	return T;}
+function vc6strarr($propertyS,$v,$rule){
+	if ($v === N){ // dessert
+		if (kInA("required",$rule) && $rule["required"]){
+			SET_RETURN_MSG("ERROR(VC6) : ".$propertyS." CANNOT BE REMOVED");return F;}
+		else{return T;}}
+	if (!isA($v)                                                   ){SET_RETURN_MSG("ERROR(VC6) : ".$propertyS.":".var_export($v,T)." NOT ARR"                                                                          );return F;}
+	if (array_key_exists("minC",$rule) && count($v) < $rule["minC"]){SET_RETURN_MSG("ERROR(VC6) : ".$propertyS.":".var_export($v,T)." HAS TOO FEW ELEMENTS - ".count($v)." WHEN AT LEAST ".$rule["minC"]." REQUIRED"    );return F;}
+	if (array_key_exists("maxC",$rule) && count($v) > $rule["maxC"]){SET_RETURN_MSG("ERROR(VC6) : ".$propertyS.":".var_export($v,T)." HAS TOO MANY ELEMENTS - ".count($v)." WHEN NO MORE THAN ".$rule["maxC"]." ALLOWED");return F;}
+	foreach ($v as $propertyS_sub=>$v_sub){
+		if (!vc6str($propertyS_sub,$v_sub,$rule)){return F;}}
+	return T;}
+
+
+
+
 ?>

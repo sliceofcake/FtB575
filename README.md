@@ -28,7 +28,6 @@ With the panel called something like "audio leeway", you can control how tightly
   
 **Link[s]/URL[s] to this build:**  
 [https://feelthebeats.se/575/edit/](https://feelthebeats.se/575/edit/)  
-[https://feelthebeats.se/575/simple/](https://feelthebeats.se/575/simple/)  
 [https://feelthebeats.se/575/simple/?tbl=chart&act=dmp](https://feelthebeats.se/575/simple/?tbl=chart&act=dmp)  
   
 **Where can I find charts?**  
@@ -40,4 +39,4 @@ With the panel called something like "audio leeway", you can control how tightly
 If you have FtB575 /edit/ loaded and you save it through your web browser [probably "File>Save Page As..."], you should be able to load it whenever you want and play it mostly without issues. /edit/ should be able to operate without server connectivity.  
   
 **What changed from the previous build to this build:**  
-• hannanos's mod in /edit/ (seeing hit errors)  
+• FtDB custom database implementation [/simple/ is no longer simple to use - only use it for the "chart-dmp" command]  

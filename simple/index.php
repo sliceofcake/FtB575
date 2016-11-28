@@ -10,8 +10,9 @@ require_once("/home/ftbsliceofcake2/gate/gate_575.php");
 require_once("../shelfRemote/butler.php");
 require_once("../shelfRemote/librarian.php");
 //require_once("../shelfRemote/mu.php");
-require_once("../shelfRemote/muValidation.php");
+//require_once("../shelfRemote/muValidation.php");
 require_once("../shelfRemote/specific.php");
+require_once("../shelfRemote/db.php");
 function head(){
 	echo "<!DOCTYPE html>";
 	echo "<html>";
@@ -55,12 +56,20 @@ function ruleToEnglish($ruleE){
 	if (array_key_exists("min",$ruleE) || array_key_exists("max",$ruleE)){
 		if (array_key_exists("min",$ruleE)){echo $ruleE["min"]." ≤ ";}
 		switch ($ruleE["type"]){default:;
-			break;case "int":echo "whole number";
-			break;case "str":echo "symbol-count";
-			break;case "fil":echo "Bytes";}
+			break;case "int"   :echo "whole number";
+			break;case "str"   :echo "symbol-count";
+			break;case "fil"   :echo "Bytes";
+			break;case "intarr":echo "whole numbers";}
 		if (array_key_exists("max",$ruleE)){echo " ≤ ".$ruleE["max"];}
 	}
 }
+function intarrval($s){
+	$res = [];
+	$intarr = preg_split("/\D+/",$s);
+	foreach ($intarr as $v){
+		if ($v === ""){continue;}
+		$res[] = int($v);}
+	return $res;}
 //vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 head();?>
 <h1>Navigation<span data-toggle="collapse" data-target="#collapse-navigation"></span></h1>
@@ -83,12 +92,12 @@ if (isset($_GET["signin"])){
 	if (isset($_POST["type"]) && $_POST["type"]==="account"){
 		require_once("../shelfRemote/muMain.php");
 		$dat = [];
-		if (isset($_POST["ID"       ])){$dat["ID"       ] = intval($_POST["ID"       ]);}
+		if (isset($_POST["_ID"      ])){$dat["_ID"      ] = intval($_POST["_ID"      ]);}
 		if (isset($_POST["nameS"    ])){$dat["nameS"    ] = strval($_POST["nameS"    ]);}
 		if (isset($_POST["passwordS"])){$dat["passwordS"] = strval($_POST["passwordS"]);}
 		$req_custom = MU_process([["tbl" => "n/a","act" => "FtB575_1|plushie_gen","dat" => $dat]]);
 		if ($req_custom[0]["sta"] < 0){fail("error : ".$req_custom[0]["msg"]);}
-		else{pass("everything worked out alright<br>Your userID is : ".$req_custom[0]["dat"]["ID"]."<br>Your plushie is : ".$req_custom[0]["dat"]["plu"]."<br><a class=\"btn btn-info\" href=\"?who=".$req_custom[0]["dat"]["ID"]."&plu=".$req_custom[0]["dat"]["plu"]."\">Go To Action Page With This Information Filled In</a>");}
+		else{pass("everything worked out alright<br>Your userID is : ".$req_custom[0]["dat"]["_ID"]."<br>Your plushie is : ".$req_custom[0]["dat"]["plu"]."<br><a class=\"btn btn-info\" href=\"?who=".$req_custom[0]["dat"]["_ID"]."&plu=".$req_custom[0]["dat"]["plu"]."\">Go To Action Page With This Information Filled In</a>");}
 		}?>
 	<h1>Sign In (w/username)<span data-toggle="collapse" data-target="#collapse-signinusername"></span></h1>
 	<h6>&nbsp;</h6>
@@ -132,7 +141,7 @@ if (isset($_GET["signin"])){
 	<div id="collapse-signinuserid" class="collapse in">
 		<form class="form-horizontal" method="post">
 			<input type="hidden" name="type" value="account">
-			<? $k = "ID"; ?>
+			<? $k = "_ID"; ?>
 			<div class="form-group">
 				<label for="slot-<?=$k;?>" class="col-sm-2 control-label"><?=$k;?></label>
 				<div class="col-sm-10">
@@ -202,7 +211,7 @@ $closedF = ($import_tbl!==NULL);
 			<label for="slot-<?=$k;?>" class="col-sm-2 control-label"><?=$k;?></label>
 			<div class="col-sm-10">
 				<select class="form-control" id="slot-<?=$k;?>" name="<?=$k;?>" required>
-					<?foreach (DB_TABLE_ARR() as $v){?>
+					<?foreach (DB::$tblWhitelist as $v){?>
 						<option<?=($import_tbl!==NULL&&$import_tbl===$v?" selected":"");?>><?=$v;?></option><?}?>
 				</select>
 				<p class="help-block">
@@ -272,7 +281,8 @@ $closedF = ($import_tbl!==NULL);
 if ($import_tbl === NULL || $import_act === NULL || $import_id === NULL){tail();}
 //if (!array_key_exists($import_tbl,$DBM_VT_COMPLETE)){fail("invalid tbl");}
 //$tblE = $DBM_VT_COMPLETE[$import_tbl];
-$tblE = DBM_VT_FILTERED($import_tbl,$import_act);
+if (!isset(DBM_VT_COMPLETE()[$import_tbl])){fail("tbl not yet in use");}
+$tblE = DBM_VT_COMPLETE()[$import_tbl];
 if ($tblE === F){fail("invalid tbl");}?>
 <hr>
 <h1><?=$_GET["tbl"];?> - <?=$_GET["act"];?> <span data-toggle="collapse" data-target="#collapse-main"></span></h1>
@@ -285,18 +295,18 @@ if ($tblE === F){fail("invalid tbl");}?>
 			if ($import_act === "dmp"){
 				$req_dmp = MU_process([["tbl" => $import_tbl,"act" => "dmp","who"=>intval($import_who),"plu"=>$import_plu]]);
 				if ($req_dmp[0]["sta"] < 0){fail("error : ".$req_dmp[0]["msg"]);}
-				if (count($req_dmp[0]["dat"]["IDA"]) === 0){fail("there aren't any entities to display");}
-				$req_get = MU_process([["tbl" => $import_tbl,"act" => "get","dat" => ["IDA"=>$req_dmp[0]["dat"]["IDA"]],"who"=>intval($import_who),"plu"=>$import_plu]]);}
+				if (count($req_dmp[0]["dat"]["_IDA"]) === 0){fail("there aren't any entities to display");}
+				$req_get = MU_process([["tbl" => $import_tbl,"act" => "get","dat" => ["_IDA"=>$req_dmp[0]["dat"]["_IDA"]],"who"=>intval($import_who),"plu"=>$import_plu]]);}
 			else if ($import_act === "get"){
-				$req_get = MU_process([["tbl" => $import_tbl,"act" => "get","dat" => ["IDA"=>[$import_id]],"who"=>intval($import_who),"plu"=>$import_plu]]);}
+				$req_get = MU_process([["tbl" => $import_tbl,"act" => "get","dat" => ["_IDA"=>[$import_id]],"who"=>intval($import_who),"plu"=>$import_plu]]);}
 			if ($req_get[0]["sta"] < 0){fail("error : ".$req_get[0]["msg"]);}
 			if (!isset($req_get[0]["dat"][$import_tbl][0])){fail("no entries");}
 			
 			// !!! hardcoded file downloads, deal with it until the next core
 			foreach ($req_get[0]["dat"][$import_tbl] as &$row){
 				if ($import_tbl === "chart"){
-					$row["txtR"] = "<a class=\"btn btn-primary\" href=\"".ROOT()["EXT_FILE_CHART"]."txtR_".$row["ID"].$row["txtRExtension_DERIVED"]."\" download>download notes</a>";
-					$row["icoR"] = "<a class=\"btn btn-primary\" href=\"".ROOT()["EXT_FILE_CHART"]."icoR_".$row["ID"].$row["icoRExtension_DERIVED"]."\" download>download icon</a>";}}unset($row);
+					$row["txtR"] = "<a class=\"btn btn-primary\" href=\"".calcDBPath("external",$import_tbl,"txtR",$row["_ID"],$row["txtRExtension_DERIVED"])."\" download>download notes</a>";
+					if (kInA("icoRExtension_DERIVED",$row)){$row["icoR"] = "<a class=\"btn btn-primary\" href=\"".calcDBPath("external",$import_tbl,"icoR",$row["_ID"],$row["icoRExtension_DERIVED"])."\" download>download icon</a>";}}}unset($row);
 			
 			// some rows will have fewer columns than others, so get the max columns
 			$headerKA = [];
@@ -318,7 +328,7 @@ if ($tblE === F){fail("invalid tbl");}?>
 			foreach ($req_get[0]["dat"][$import_tbl] as $row){?>
 				<tr>
 					<?foreach ($headerKA as $k){?>
-					<td><?=(array_key_exists($k,$row)?$row[$k]:"<span class=\"text-danger\">[hidden]</span>");?></td>
+					<td><?=(array_key_exists($k,$row)?str($row[$k]):"<span class=\"text-danger\">[missing/hidden]</span>");?></td>
 					<?}?>
 				</tr><?}?>
 				</tbody>
@@ -343,7 +353,7 @@ if ($tblE === F){fail("invalid tbl");}?>
 			<?
 		break;case "del":
 			require_once("../shelfRemote/muMain.php");
-			$req_del = MU_process([["tbl" => $import_tbl,"act" => "del","dat" => ["ID"=>intval($import_id)],"who"=>intval($import_who),"plu"=>$import_plu]]);
+			$req_del = MU_process([["tbl" => $import_tbl,"act" => "del","dat" => ["_ID"=>intval($import_id)],"who"=>intval($import_who),"plu"=>$import_plu]]);
 			if ($req_del[0]["sta"] < 0){fail("error : ".$req_del[0]["msg"]);}
 			else{pass("everything worked out alright");}
 		break;case "new":
@@ -353,12 +363,16 @@ if ($tblE === F){fail("invalid tbl");}?>
 				//echo "_FILES<br>";var_export($_FILES);echo "<br><br>";
 				$dat = [];
 				if ($import_act === "edt"){
-					$dat["ID"] = intval($_POST["id"]);}
+					$dat["_ID"] = intval($_POST["id"]);}
 				// get a list of checkmarked properties
 				$kApprovedA = [];
 				foreach ($_POST as $k=>$v){
 					if (mb_substr($k,0,mb_strlen("checkbox-")) !== "checkbox-"){continue;}
 					$kApprovedA[] = mb_substr($k,mb_strlen("checkbox-"));}
+				$kRemoveA = [];
+				foreach ($_POST as $k=>$v){
+					if (mb_substr($k,0,mb_strlen("checkbox-remove-")) !== "checkbox-remove-"){continue;}
+					$kRemoveA[] = mb_substr($k,mb_strlen("checkbox-remove-"));}
 				// resolve that list to actual properties, set them
 				//var_export($_POST);echo"<br><br>";
 				//var_export($kApprovedA);echo"<br><br>";
@@ -366,11 +380,10 @@ if ($tblE === F){fail("invalid tbl");}?>
 					if (!array_key_exists($k,$_POST)){continue;}
 					if (!array_key_exists("type-".$k,$_POST)){continue;}
 					$type = $_POST["type-".$k];
-					//echo "[".$type."]";
-					$v = $_POST[$k];
 					switch ($type){default:;
-						break;case "int":$dat[$k] = intval($v);
-						break;case "str":$dat[$k] = strval($v);}}
+						break;case "int"   :$dat[$k] = vInA($k,$kRemoveA) ? N : intval($_POST[$k]);
+						break;case "str"   :$dat[$k] = vInA($k,$kRemoveA) ? N : strval($_POST[$k]);
+						break;case "intarr":$dat[$k] = vInA($k,$kRemoveA) ? N : intarrval($_POST[$k]);}}
 				//var_export($dat);
 				require_once("../shelfRemote/muMain.php");
 				$req_dmp = MU_process([["tbl" => $import_tbl,"act" => $import_act,"dat" => $dat,"who"=>intval($import_who),"plu"=>$import_plu]]);
@@ -383,22 +396,32 @@ if ($tblE === F){fail("invalid tbl");}?>
 				<input type="hidden" name="id" value="<?=$import_id;?>">
 			<?
 			foreach ($tblE as $k=>$ruleE){
-				if ($k === "ID"){continue;} // we already account for ID
+				if ($k === "_ID"){continue;} // we already account for ID
+				if ($import_act === "new"){
+					$ruleE["requiredNow"] = $ruleE["required"];}
+				else if ($import_act === "edt"){
+					$ruleE["requiredNow"] = F;}
 				if (array_key_exists("vA",$ruleE)){?>
 					<div class="form-group">
 						<label for="slot-<?=$k;?>" class="col-sm-2 control-label"><?=$k;?></label>
 						<div class="col-sm-10">
 							<input type="hidden" name="type-<?=$k;?>" value="<?=$ruleE["type"];?>">
-							<select class="form-control" id="slot-<?=$k;?>" name="<?=$k;?>"<?=($import_act==="edt"||array_key_exists("default",$ruleE)?"":" required");?>>
+							<select class="form-control" id="slot-<?=$k;?>" name="<?=$k;?>"<?=($import_act==="edt"||!$ruleE["requiredNow"]?"":" required");?>>
 								<?foreach ($ruleE["vA"] as $v){?>
-									<option<?=(array_key_exists("default",$ruleE)&&$ruleE["default"]===$v?" selected":"");?>><?=$v;?></option><?}?>
+									<option><?=$v;?></option><?}?>
 							</select>
 							<p class="help-block">
 								<div class="checkbox">
 									<label>
-										<input type="checkbox" name="checkbox-<?=$k;?>" value="on" oninput="document.getElementById('').setAttribute('name','')">
+										<input type="checkbox" name="checkbox-<?=$k;?>" value="on">
 										I want to set to this property.
 									</label>
+									<?if ($import_act === "edt"){?>
+									<label>
+										<input type="checkbox" name="checkbox-remove-<?=$k;?>" value="on">
+										I want to get rid of this property. [has priority over the entry textbox] [the set-checkbox must also be checked]
+									</label>
+									<?}?>
 								</div>
 								<?=$ruleE["help"];?><br>
 								<?=ruleToEnglish($ruleE);?>
@@ -412,35 +435,46 @@ if ($tblE === F){fail("invalid tbl");}?>
 								<label for="slot-<?=$k;?>" class="col-sm-2 control-label"><?=$k;?></label>
 								<div class="col-sm-10">
 									<input type="hidden" name="type-<?=$k;?>" value="<?=$ruleE["type"];?>">
-									<input type="number" class="form-control" id="slot-<?=$k;?>" name="<?=$k;?>" placeholder="<?=(array_key_exists("default",$ruleE)?$ruleE["default"]:"");?>"<?=(array_key_exists("min",$ruleE)?" min=\"".$ruleE["min"]."\"":"");?><?=(array_key_exists("max",$ruleE)?" max=\"".$ruleE["max"]."\"":"");?><?=($import_act==="edt"||array_key_exists("default",$ruleE)?"":" required");?>>
+									<input type="number" class="form-control" id="slot-<?=$k;?>" name="<?=$k;?>" placeholder=""<?=(array_key_exists("min",$ruleE)?" min=\"".$ruleE["min"]."\"":"");?><?=(array_key_exists("max",$ruleE)?" max=\"".$ruleE["max"]."\"":"");?><?=($import_act==="edt"||!$ruleE["requiredNow"]?"":" required");?>>
 									<p class="help-block">
 										<div class="checkbox">
 											<label>
 												<input type="checkbox" name="checkbox-<?=$k;?>" value="on">
 												I want to set to this property.
 											</label>
+											<?if ($import_act === "edt"){?>
+											<label>
+												<input type="checkbox" name="checkbox-remove-<?=$k;?>" value="on">
+												I want to get rid of this property. [has priority over the entry textbox] [the set-checkbox must also be checked]
+											</label>
+											<?}?>
 										</div>
 										<?=$ruleE["help"];?><br>
 										<?=ruleToEnglish($ruleE);?>
 									</p>
 								</div>
 							</div><?
-						//echo "<textarea class=\"form-control\" rows=\"3\"></textarea>";
 						break;case "str":?>
 							<div class="form-group">
 								<label for="slot-<?=$k;?>" class="col-sm-2 control-label"><?=$k;?></label>
 								<div class="col-sm-10">
 									<input type="hidden" name="type-<?=$k;?>" value="<?=$ruleE["type"];?>"><?
 									if (array_key_exists("max",$ruleE) && $ruleE["max"] < 500){?>
-										<input type="text" class="form-control" id="slot-<?=$k;?>" name="<?=$k;?>" placeholder="<?=(array_key_exists("default",$ruleE)?$ruleE["default"]:"");?>"<?=(array_key_exists("max",$ruleE)?" size=\"".$ruleE["max"]."\"":"");?><?=($import_act==="edt"||array_key_exists("default",$ruleE)?"":" required");?>><?}
+										<input type="text" class="form-control" id="slot-<?=$k;?>" name="<?=$k;?>" placeholder=""<?=(array_key_exists("max",$ruleE)?" size=\"".$ruleE["max"]."\"":"");?><?=($import_act==="edt"||!$ruleE["requiredNow"]?"":" required");?>><?}
 									else{?>
-										<textarea class="form-control" id="slot-<?=$k;?>" name="<?=$k;?>" placeholder="blah" rows="3"<?=(array_key_exists("max",$ruleE)?" size=\"".$ruleE["max"]."\"":"");?><?=($import_act==="edt"||array_key_exists("default",$ruleE)?"":" required");?>></textarea><?}?>
+										<textarea class="form-control" id="slot-<?=$k;?>" name="<?=$k;?>" placeholder="blah" rows="3"<?=(array_key_exists("max",$ruleE)?" size=\"".$ruleE["max"]."\"":"");?><?=($import_act==="edt"||!$ruleE["requiredNow"]?"":" required");?>></textarea><?}?>
 									<p class="help-block">
 										<div class="checkbox">
 											<label>
 												<input type="checkbox" name="checkbox-<?=$k;?>" value="on">
 												I want to set to this property.
 											</label>
+											<?if ($import_act === "edt"){?>
+											<label>
+												<input type="checkbox" name="checkbox-remove-<?=$k;?>" value="on">
+												I want to get rid of this property. [has priority over the entry textbox] [the set-checkbox must also be checked]
+											</label>
+											<?}?>
 										</div>
 										<?=$ruleE["help"];?><br>
 										<?=ruleToEnglish($ruleE);?>
@@ -452,11 +486,37 @@ if ($tblE === F){fail("invalid tbl");}?>
 								<label for="slot-<?=$k;?>" class="col-sm-2 control-label"><?=$k;?></label>
 								<div class="col-sm-10">
 									<input type="hidden" name="type-0_<?=$k;?>" value="<?=$ruleE["type"];?>">
-									<input type="file" class="form-control" id="slot-<?=$k;?>" name="0_<?=$k;?>"<?=($import_act==="edt"||array_key_exists("default",$ruleE)?"":" required");?>>
+									<input type="file" class="form-control" id="slot-<?=$k;?>" name="0_<?=$k;?>"<?=($import_act==="edt"||!$ruleE["requiredNow"]?"":" required");?>>
 									<p class="help-block">
 										This property will always be asserted if you provide a file.<br>
 										<?=$ruleE["help"];?><br>
-										<?=ruleToEnglish($ruleE);?>
+										<?=ruleToEnglish($ruleE);?><br>
+										Supported file extensions: <?=str(FILE_EXTENSION_WHITELIST());?>
+									</p>
+								</div>
+							</div><?
+						break;case "intarr":?>
+							<div class="form-group">
+								<label for="slot-<?=$k;?>" class="col-sm-2 control-label"><?=$k;?></label>
+								<div class="col-sm-10">
+									<input type="hidden" name="type-<?=$k;?>" value="<?=$ruleE["type"];?>">
+									<input type="text" class="form-control" id="slot-<?=$k;?>" name="<?=$k;?>" placeholder=""<?=($import_act==="edt"||!$ruleE["requiredNow"]?"":" required");?>>
+									<p class="help-block">
+										<div class="checkbox">
+											<label>
+												<input type="checkbox" name="checkbox-<?=$k;?>" value="on">
+												I want to set to this property.
+											</label>
+											<?if ($import_act === "edt"){?>
+											<label>
+												<input type="checkbox" name="checkbox-remove-<?=$k;?>" value="on">
+												I want to get rid of this property. [has priority over the entry textbox] [the set-checkbox must also be checked]
+											</label>
+											<?}?>
+										</div>
+										<?=$ruleE["help"];?><br>
+										<?=ruleToEnglish($ruleE);?><br>
+										Type multiple integers [whole numbers] separated by commas and/or spaces.
 									</p>
 								</div>
 							</div><?}}}?>
