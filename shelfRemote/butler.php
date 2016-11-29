@@ -201,21 +201,22 @@ function rmComplete($basename,$firstRunF=T){
 		$status = @unlink($basename);if ($status === F){return F;}
 		return T;}
 	return F;}
-// ! untested
-function cpComplete($src,$dst){
+function cpComplete($src,$dst,$firstRunF=T){
+	if ($firstRunF){
+		clearstatcache();} // for is_dir and is_file [and possibly more, didn't update this comment]
 	if (mb_strlen($src) >= 1 && mb_substr($src,mb_strlen($src)-1) === "/"){$src = mb_substr($src,0,mb_strlen($src)-1);} // trim tailing slash
 	if (mb_strlen($dst) >= 1 && mb_substr($dst,mb_strlen($dst)-1) === "/"){$src = mb_substr($dst,0,mb_strlen($dst)-1);} // trim tailing slash
 	$res = T;
-	$dir = @opendir($src);if ($dir === F){echo 1;return F;}
-	$status = @mkdir($dst,0755);if ($status === F){echo 2;return F;}
+	$dir = @opendir($src);if ($dir === F){return F;}
+	$status = @mkdir($dst,0755);if ($status === F){return F;}
 	while(($file = readdir($dir)) !== F){
 		if ($file !== "." && $file !== ".."){
 			if (@is_dir($src."/".$file)){
-				$status = cpComplete($src."/".$file,$dst."/".$file);
+				$status = cpComplete($src."/".$file,$dst."/".$file,F);
 				$res = $res && $status;}
 			else if (@is_file($src."/".$file)){
-				$status = copy($src."/".$file,$dst."/".$file);if ($status === F){echo 3;return F;}}
-			else{echo 4;return F;}}}
+				$status = copy($src."/".$file,$dst."/".$file);if ($status === F){return F;}}
+			else{return F;}}}
 	closedir($dir);
 	return $res;}
 
