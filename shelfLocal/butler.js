@@ -1695,6 +1695,7 @@ document.addEventListener("DOMContentLoaded",function(){
 // !!! this code is in need of cleanup, since it has weathered trials since FtB4, its birthplace
 
 var panflo = {
+	panelSelector : ".layer",
 	aliveF : T,
 	mousedownTriggeredGrabF : F,
 	handleResizeOuterS : 6,
@@ -1828,7 +1829,7 @@ var panflo = {
 			if (row.PANFLO.grabbed || row.PANFLO.grabbedResize){event.stopPropagation();}
 			row.PANFLO.grabbed = false;
 			row.PANFLO.grabbedResize = false;}},
-	bringFront : function(el){el.style.zIndex = µ.qdA(".panel").map(el=>int(getComputedStyle(el).getPropertyValue("z-index"))).max(1)+1;},
+	bringFront : function(el){el.style.zIndex = µ.qdA(this.panelSelector).map(el=>int(getComputedStyle(el).getPropertyValue("z-index"))).max(1)+1;},
 };
 document.addEventListener("DOMContentLoaded",function(){
 	document.addEventListener("mousedown",function(e){panflo.mousedown(e);});

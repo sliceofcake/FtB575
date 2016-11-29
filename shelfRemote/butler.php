@@ -71,7 +71,7 @@ function π_reduce(&$vA,$fxn,$accumulator=N){ // cannot start accumulator to N o
 		if ($kAI === 0 && $accumulator === N){$accumulator = $v;continue;}
 		$accumulator = $fxn($accumulator,$v,$k,$vA);}
 	return $accumulator;}
-function π_filter(&$vA,$fxn){ // !!! here for numbered arrays redo the keys
+function π_filter(&$vA,$fxn){
 	$res = [];
 	$traditionalF = T;
 	for ($kA = array_keys($vA),$kAI = 0,$kAC = count($kA); $kAI < $kAC; $kAI++){$k = $kA[$kAI];

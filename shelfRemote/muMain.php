@@ -219,7 +219,7 @@ function MU_fxn(&$p,&$o,&$in){global $MU_TABLE;
 				$statusF = vc6($p,$vt);if ($statusF === F){return F;}
 				//....
 				$E = DB::get($p["tbl"],$d["_ID"]);
-				if ($E === F){SET_RETURN_MSG("ERROR : specified database row [ID:'".esc($d["_ID"])."'] doesn't exist");return F;}
+				if ($E === F){SET_RETURN_MSG("ERROR : specified database row [ID:'".$d["_ID"]."'] doesn't exist");return F;}
 				switch ($p["tbl"]){default:;
 					break;case "board"     :
 						if (!DBM_CLR(3)){SET_RETURN_MSG("ERROR : ACCESS DENIED");return F;}
@@ -246,6 +246,9 @@ function MU_fxn(&$p,&$o,&$in){global $MU_TABLE;
 					break;case "user"      :
 						if (!kInA("_ID",$E)){SET_RETURN_MSG("ERROR : PANIC");return F;}
 						if (DBM_UID() !== $E["_ID"]){SET_RETURN_MSG("ERROR : ACCESS DENIED");return F;}
+						if (kInA("passwordS",$d)){
+							$d["hashS"] = pHash($d["passwordS"]);
+							unset($d["passwordS"]);}
 				}
 				//....
 				$d["t1"] = π_now();
@@ -283,7 +286,7 @@ function MU_fxn(&$p,&$o,&$in){global $MU_TABLE;
 				$statusF = vc6($p,$vt);if ($statusF === F){return F;}
 				//....
 				$E = DB::get($p["tbl"],$d["_ID"]);
-				if ($E === F){SET_RETURN_MSG("ERROR : specified database row [ID:'".esc($d["_ID"])."'] doesn't exist");return F;}
+				if ($E === F){SET_RETURN_MSG("ERROR : specified database row [ID:'".$d["_ID"]."'] doesn't exist");return F;}
 				switch ($p["tbl"]){default:;
 					break;case "board"     :
 						if (!DBM_CLR(3)){SET_RETURN_MSG("ERROR : ACCESS DENIED");return F;}

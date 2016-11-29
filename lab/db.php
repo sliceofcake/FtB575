@@ -1,6 +1,8 @@
 <?
 require_once("/home/ftbsliceofcake2/gate/gate_575.php");
 
+die;die;die;
+
 require_once("../shelfRemote/mysql.php");
 require_once("../shelfRemote/db.php");
 

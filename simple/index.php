@@ -27,12 +27,12 @@ function head(){
 	echo "<meta name=\"viewport\" content=\"width=device-width,user-scalable=yes,initial-scale=1\">";
 	echo "<title>FtB575 /simple/</title>";
 	echo "<link href=\"../../image/favicon.png\" rel=\"icon\" type=\"image/png\">";
-	echo "<link rel=\"stylesheet\" href=\"../harbor/bootstrap-3.3.7-dist/css/bootstrap.min.css\">";
-	echo "<link rel=\"stylesheet\" href=\"../harbor/bootstrap-3.3.7-dist/css/bootstrap-theme.min.css\">";
-	echo "<link rel=\"stylesheet\" href=\"../harbor/DataTables/datatables.min.css\">";
-	echo "<script src=\"../harbor/jquery-2.2.4.min.js\"></script>";
-	echo "<script src=\"../harbor/bootstrap-3.3.7-dist/js/bootstrap.min.js\"></script>";
- 	echo "<script src=\"../harbor/DataTables/datatables.min.js\"></script>";
+	echo "<link rel=\"stylesheet\" href=\"../../harbor/bootstrap-3.3.7-dist/css/bootstrap.min.css\">";
+	echo "<link rel=\"stylesheet\" href=\"../../harbor/bootstrap-3.3.7-dist/css/bootstrap-theme.min.css\">";
+	echo "<link rel=\"stylesheet\" href=\"../../harbor/DataTables/datatables.min.css\">";
+	echo "<script src=\"../../harbor/jquery-2.2.4.min.js\"></script>";
+	echo "<script src=\"../../harbor/bootstrap-3.3.7-dist/js/bootstrap.min.js\"></script>";
+ 	echo "<script src=\"../../harbor/DataTables/datatables.min.js\"></script>";
 	echo "<style>";
 	echo "body{margin:40px;}";
 	echo "[data-toggle='collapse']::after{content:'▼';cursor:pointer;}";

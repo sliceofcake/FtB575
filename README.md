@@ -37,6 +37,3 @@ With the panel called something like "audio leeway", you can control how tightly
   
 **Remember that you can save FtB575 /edit/ and play offline, without internet connection.**  
 If you have FtB575 /edit/ loaded and you save it through your web browser [probably "File>Save Page As..."], you should be able to load it whenever you want and play it mostly without issues. /edit/ should be able to operate without server connectivity.  
-  
-**What changed from the previous build to this build:**  
-• FtDB custom database implementation [/simple/ is no longer simple to use - only use it for the "chart-dmp" command]  
