@@ -202,18 +202,20 @@ function rmComplete($basename,$firstRunF=T){
 		return T;}
 	return F;}
 // ! untested
-function cpComplete($src,$dst){return;
+function cpComplete($src,$dst){
+	if (mb_strlen($src) >= 1 && mb_substr($src,mb_strlen($src)-1) === "/"){$src = mb_substr($src,0,mb_strlen($src)-1);} // trim tailing slash
+	if (mb_strlen($dst) >= 1 && mb_substr($dst,mb_strlen($dst)-1) === "/"){$src = mb_substr($dst,0,mb_strlen($dst)-1);} // trim tailing slash
 	$res = T;
-	$dir = @opendir($src);if ($dir === F){return F;}
-	$status = @mkdir($dst,0755);if ($status === F){return F;}
+	$dir = @opendir($src);if ($dir === F){echo 1;return F;}
+	$status = @mkdir($dst,0755);if ($status === F){echo 2;return F;}
 	while(($file = readdir($dir)) !== F){
 		if ($file !== "." && $file !== ".."){
 			if (@is_dir($src."/".$file)){
 				$status = cpComplete($src."/".$file,$dst."/".$file);
 				$res = $res && $status;}
 			else if (@is_file($src."/".$file)){
-				$status = copy($src."/".$file,$dst."/".$file);if ($status === F){return F;}}
-			else{return F;}}}
+				$status = copy($src."/".$file,$dst."/".$file);if ($status === F){echo 3;return F;}}
+			else{echo 4;return F;}}}
 	closedir($dir);
 	return $res;}
 

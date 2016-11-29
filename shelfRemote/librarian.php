@@ -18,8 +18,7 @@ require_once("specific.php");
 // THIS INFORMATION MUST BE CHANGED BEFORE RELEASING
 function ROOT(){ // PHP and globals smh
 	$ROOT = [];
-	
-	$ROOT["STABLE_F"        ] = T; // <- ! this needs to change when you release
+	$ROOT["STABLE_F"        ] = mb_strstr(getcwd(),"/575_unstable/")===F;
 	
 	$ROOT["DIR_SUBROOT"     ] = "/home/ftbsliceofcake2/";
 	

@@ -212,7 +212,7 @@ $closedF = ($import_tbl!==NULL);
 			<div class="col-sm-10">
 				<select class="form-control" id="slot-<?=$k;?>" name="<?=$k;?>" required>
 					<?foreach (DB::$tblWhitelist as $v){?>
-						<option<?=($import_tbl!==NULL&&$import_tbl===$v?" selected":"");?>><?=$v;?></option><?}?>
+						<option<?=($import_tbl===NULL?("chart"===$v?" selected":""):($import_tbl===$v?" selected":""));?>><?=$v;?></option><?}?>
 				</select>
 				<p class="help-block">
 					The type of entity.
@@ -225,7 +225,7 @@ $closedF = ($import_tbl!==NULL);
 			<div class="col-sm-10">
 				<select class="form-control" id="slot-<?=$k;?>" name="<?=$k;?>" required>
 					<?foreach (["dmp","get","new","edt","del"] as $v){?>
-						<option<?=($import_act!==NULL&&$import_act===$v?" selected":"");?>><?=$v;?></option><?}?>
+						<option<?=($import_act===NULL?(("dmp"===$v?" selected":"")):($import_act===$v?" selected":""));?>><?=$v;?></option><?}?>
 				</select>
 				<p class="help-block">
 					The type of action. [dmp - return all existing entities | get - return a specific existing entity | new - create an entity | edt - edit an existing entity | del - delete an existing entity]

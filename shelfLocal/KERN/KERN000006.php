@@ -676,6 +676,10 @@ var KERN000006 = {
 										if (distanceBest === N || distance < distanceBest){/*ll("store");*/distanceBest = distance;noteBestI = noteI;}}
 									// use the closest note for the comparison
 									if (noteBestI !== -1 && distanceBest <= _.missBoundary){var note = _.lanexnoteA[laneI][noteBestI];
+										// code regression somehow
+										if (typeof _.modO_hannanos_ver1.lanexpaintEA[laneI] === "undefined"){
+											_.modO_hannanos_ver1.lanexpaintEA[laneI] = [];}
+										
 										_.modO_hannanos_ver1.lanexpaintEA[laneI].push({type:"down",err:note.head-tDejusted});
 										_.renderRegister("hannanos_ver1");
 										//ll("distanceBest : "+distanceBest);
