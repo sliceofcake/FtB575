@@ -78,6 +78,7 @@ p.asrStyleDynamic = ()=>{};
 p.genCSSVarS = function(o={}){π.p(o,{tx:[0,0,1],co:[0,0,0.5],bg:[0,0,0,0.85]});
 	var {tx,co,bg} = o;
 	var res = "--c:"+hsla(tx)+";--bgc:"+hsla(bg)+";"
+	        + "--bgc-tartan:"+hslma(co,bg,0.5)+";"
 	        + "--c-placeholder:"+hslmma(tx,co,bg,0.6,0.6)+";--c-highlight:"+hslma(co,tx,0.6,0.5)+";"
 	        + "--bgc-button-lo:"+hslma(co,bg,0.4,bg[3])+";--bc-button-lo:"+hslmma(co,tx,bg,0.8,0.8)+";--bsw-button-lo:0px 0px 12px 0px "+hslmma(co,tx,bg,0.8,0.8)+" inset,0px 0px 6px 0px "+hslmma(co,tx,bg,0.8,0.8)+" inset;"
 	        + "--bgc-button-hf:"+hslma(co,bg,0.6,bg[3])+";--bc-button-hf:"+hslmma(co,tx,bg,0.8,0.8)+";--bsw-button-hf:0px 0px 12px 0px "+hslmma(co,tx,bg,0.8,0.8)+" inset,0px 0px 6px 0px "+hslmma(co,tx,bg,0.8,0.8)+" inset;"
@@ -114,7 +115,7 @@ var ø = {
 				+ "background-clip:padding-box;",
 			"*:hover,*:focus,*:active" : "transition-timing-function:linear;transition-duration:0s;transition-delay:0s;",
 			"html" : "¥s:1000‰;",
-			"body" : "¥s:1000‰;¥ff:Verdana,Geneva,sans-serif;¥fs:"+txHF+"px;¥p:0px;¥m:0px;¥c:var(--c);¥bgc:var(--bgc);¥bgi:url("+bgPath+");¥bgr:no-repeat;¥bgs:cover;¥bgo:content-box;¥bgp:center center;¥bga:fixed;¥o:hidden;",
+			"body" : "¥s:1000‰;¥ff:Verdana,Geneva,sans-serif;¥fs:"+txHF+"px;¥p:0px;¥m:0px;¥c:var(--c);¥bgc:var(--bgc);"/*¥bgi:url("+bgPath+");*/+"¥bgr:no-repeat;¥bgs:cover;¥bgo:content-box;¥bgp:center center;¥bga:fixed;¥o:hidden;",
 			"table" : "border-collapse:collapse;table-layout:fixed;", // the following: "table-layout:fixed;" uses the first row it encounters as the definitive widths for the entire table
 			"a,a:link,a:visited,.link"                : "¥:hand;¥c:"+hsla(co)        +";text-decoration:none;",
 			"a:hover,a:focus,.link:hover,.link:focus" : "¥:hand;¥c:"+hslma(co,tx,0.5)+";text-decoration:underline;",

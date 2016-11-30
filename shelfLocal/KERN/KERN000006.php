@@ -824,13 +824,15 @@ var KERN000006 = {
 					break;case "lo":
 						_.anchorT = _.chartT;
 						_.anchorP = _.chartP;
-						// !!! random color noise so I know when debugging that the gf is reponsive
+						// ! random color noise to let you know that the gf is paused and responsive
 						if (π.rand(0,29)===0){
 							var ctx = _.ctxO.S;
 							anipnt.clearRect(ctx,0,0,_.cachedW(),_.cachedH(),_.pxd);
-							var size = 20;
+							var size = 10;
 							for (var i = 0; i < 7; i++){
-								anipnt.drawRect(ctx,π.rand(0,_.cachedW()-size),π.rand(0,_.cachedH()-size),size,size,hsla([π.rand(0,1000)*0.001,π.rand(0,1000)*0.001,π.rand(0,1000)*0.001],π.rand(0,1000)*0.001),_.pxd);}
+								anipnt.drawStar(ctx,π.rand(0,_.cachedW()-size),π.rand(0,_.cachedH()-size),size,hsla([π.rand(0,1000)*0.001,π.rand(0,1000)*0.001,π.rand(0,1000)*0.001],π.rand(0,1000)*0.001),_.pxd);}
+							for (var i = 0; i < 7; i++){
+								anipnt.fillText(ctx,"PAUSED",π.rand(0,_.cachedW()-size),π.rand(0,_.cachedH()-size),hsla([π.rand(0,1000)*0.001,π.rand(0,1000)*0.001,π.rand(0,1000)*0.001],π.rand(0,1000)*0.001),_.pxd);}
 							_.renderRegister("S");}
 						if (_.dontBeLazy){
 							_.renderRegister("N");

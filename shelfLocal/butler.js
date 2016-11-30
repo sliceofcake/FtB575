@@ -1871,6 +1871,17 @@ var anipnt = {
 		ctx.arc(x*pxd,y*pxd,pxd*diameter/2,0,Math.PI*2,true);
 		//ctx.closePath();
 		ctx.fill();},
+	drawStar : function(ctx,xCenter,yCenter,r,color,pxd=1){
+		if (ctx.fillStyle !== color){ // !!! theory that this actually hurts performance
+			ctx.fillStyle =   color;}
+		ctx.beginPath();
+		ctx.moveTo(xCenter*pxd,(yCenter-r)*pxd);
+		ctx.quadraticCurveTo(xCenter*pxd,yCenter*pxd,(xCenter+r)*pxd, yCenter   *pxd);
+		ctx.quadraticCurveTo(xCenter*pxd,yCenter*pxd, xCenter   *pxd,(yCenter+r)*pxd);
+		ctx.quadraticCurveTo(xCenter*pxd,yCenter*pxd,(xCenter-r)*pxd, yCenter   *pxd);
+		ctx.quadraticCurveTo(xCenter*pxd,yCenter*pxd, xCenter   *pxd,(yCenter-r)*pxd);
+		ctx.closePath();
+		ctx.fill();},
 	drawLine : function(ctx,x,y,xx,yy,w,color,lineCap="butt",pxd=1){
 		if (ctx.strokeStyle !== color){ // !!! theory that this actually hurts performance
 			ctx.strokeStyle =   color;}
