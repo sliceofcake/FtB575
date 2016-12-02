@@ -524,7 +524,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 	p.shift("←←");
 	
 	// hannanos's mod
-	var h = 40;
+	var h = 30;
 	elKERNDimO["bubbleHanna0"  ] = {w: 50,h};
 	elKERNDimO["textHanna0"    ] = {w: 50,h};
 	elKERNDimO["durationHanna0"] = {w:200,h};
@@ -544,6 +544,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 	
 	// Decon's mod
 	p.shift("↓");
+	t += 30;
 	p.shift("←←");
 	var h = 120;
 	elKERNDimO["1‰Deco0" ] = {w: 30,h};
@@ -590,6 +591,39 @@ document.addEventListener("DOMContentLoaded",()=>{
 	elKERNLinkA.push({from:"4coDeco0",to:"gameframe0",portA:[[["coValueS"],["modO_Decon082_ver1","overlayA",2,"co1"]],[["coValueS"],["modO_Decon082_ver1","overlayA",2,"co2"]],[["coValueS"],["modO_Decon082_ver1","overlayA",3,"co1"]]]});
 	elKERNLinkA.push({from:"5coDeco0",to:"gameframe0",portA:[                                                                                                                  [["coValueS"],["modO_Decon082_ver1","overlayA",3,"co2"]]]});
 	
+	// nejuer's mod
+	p.shift("↓");
+	t += 30;
+	p.shift("←←");
+	var h = 30;
+	elKERNDimO["modeNej0" ] = {w:100,h};
+	elKERNDimO["hueNej0"  ] = {w:200,h};
+	elKERNDimO["tLoopNej0"] = {w:300,h};
+	elKERNDimO["yLoopNej0"] = {w:300,h};
+	elKERNDimO["warningNej0"] = {w:600,h:100};
+	elKERNDimO.forEach(elKERNDim=>{elKERNDim.i = elKERNDim.h + p.handleH;});
+	
+	/***/elKERNPreO[_="modeNej0" ] = {partID:"KERN000005",title:"modeNej" ,initial:[["value",0],["dirAsc","E"],["ascRoot",0],["min",0],["max",2],["snap",1],["ascMode","additive"],["valueFxn",v=>v===2?("physical"):(v===1?"temporal":"off")]]};p.preBuild();
+	p.shift("→");
+	/***/elKERNPreO[_="hueNej0"  ] = {partID:"KERN000008",title:"hueNej"  ,initial:[["hValue",0],["sValue",1],["lValue",0.5],["aValue",1]]};p.preBuild();
+	p.shift("↓");
+	p.shift("←←");
+	/***/elKERNPreO[_="tLoopNej0"] = {partID:"KERN000005",title:"tLoopNej",initial:[["value",3000000],["dirAsc","E"],["ascRoot",0],["min",0],["max",20000000],["snap",250000],["ascMode","additive"],["valueFxn",v=>(v/1000000)+"s"]]};p.preBuild();
+	p.shift("→");
+	/***/elKERNPreO[_="yLoopNej0"] = {partID:"KERN000005",title:"yLoopNej",initial:[["value",8000],["dirAsc","E"],["ascRoot",0],["min",0],["max",15000],["snap",1000],["ascMode","additive"],["valueFxn",v=>v+"‰"]]};p.preBuild();
+	p.shift("↓");
+	p.shift("←←");
+	/***/elKERNPreO[_="warningNej0"] = {partID:"KERN000013",title:"warningNej" ,initial:[["lineWrap",T],["txt","Health Warning\nUsing small values for tLoop or yLoop may cause notes to change color rapidly, which may cause discomfort, or, in susceptible individuals, a negative health reaction. Either (1) don't use this mod or (2) use the largest possible values and slowly lower them as you still feel comfortable."]]};p.preBuild();
+	
+	elKERNLinkA.push({from:"modeNej0" ,to:"gameframe0",portA:[[["value" ],["modO_nejuer_ver1","mode"   ]]]});
+	elKERNLinkA.push({from:"hueNej0"  ,to:"gameframe0",portA:[[["hValue"],["modO_nejuer_ver1","hueRoot"]]]});
+	elKERNLinkA.push({from:"tLoopNej0",to:"gameframe0",portA:[[["value" ],["modO_nejuer_ver1","tLoop"  ]]]});
+	elKERNLinkA.push({from:"yLoopNej0",to:"gameframe0",portA:[[["value" ],["modO_nejuer_ver1","yLoop"  ]]]});
+	
+	
+	
+	
+	
 	
 	
 	
@@ -623,9 +657,9 @@ document.addEventListener("DOMContentLoaded",()=>{
 	/***/elKERNPreO[_="gfo!m14TransFontSize0"] = {partID:"KERN000005",title:"font size"   ,initial:[["value",10],["dirAsc","E"],["ascRoot",0],["min",0],["max",16],["snap",0.5],["ascMode","additive"],["valueFxn",v=>v+"px"]]};p.preBuild();
 	p.shift("↓");
 	p.shift("←←");
-	/***/elKERNPreO[_="gfFtB4TransTarget0"   ] = {partID:"KERN000013",title:"FtB4 trans." ,initial:[["txt",""]]};p.preBuild();
+	/***/elKERNPreO[_="gfFtB4TransTarget0"   ] = {partID:"KERN000013",title:"FtB4 trans." ,initial:[["lineWrap",F],["txt",""]]};p.preBuild();
 	p.shift("→");
-	/***/elKERNPreO[_="gfo!m14TransTarget0"  ] = {partID:"KERN000013",title:"o!m14 trans.",initial:[["txt",""]]};p.preBuild();
+	/***/elKERNPreO[_="gfo!m14TransTarget0"  ] = {partID:"KERN000013",title:"o!m14 trans.",initial:[["lineWrap",F],["txt",""]]};p.preBuild();
 	
 	elKERNLinkA.push({from:"gfFtB4TransTrig0"     ,to:"gameframe0"         ,portA:[[["edgeHiOutSignal"],["translateSignalO","FtB4"]]]});
 	elKERNLinkA.push({from:"gfFtB4TransFontSize0" ,to:"gfFtB4TransTarget0" ,portA:[[["value"],["fs"]]]});

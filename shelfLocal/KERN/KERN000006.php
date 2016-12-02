@@ -93,6 +93,7 @@ var KERN000006 = {
 				layernameA : ["S","hannanos_ver1","J","Decon082_ver1","N","L"],
 				modO_Decon082_ver1  : {overlayA:[]},
 				modO_hannanos_ver1 : {bubbleF:1,textF:1,language:"english",durationT:1000000,lanexpaintEA:[],counter:0}, // bubbleF and textF should be booleans, but KERN3 sliders don't support that
+				modO_nejuer_ver1 : {mode:2,hueRoot:0,tLoop:3000000,yLoop:8000}, // mode:{0:off,1:temporal,2:physical}
 				
 				// utilities [optimizations]
 				errorToScore : function(error,boundary=this.missBoundary){return (error>boundary)?0:Math.cos(Math.PI*error/(2*boundary))*boundary;},
@@ -428,6 +429,19 @@ var KERN000006 = {
 											? (this.noteActiveCoA[l])
 											: (this.noteFadedCoA[l]))
 										: (this.noteCoA[l]);
+									if (_.modO_nejuer_ver1.mode === 1 && _.modO_nejuer_ver1.tLoop !== 0){
+										var color = hslaExtract(color);
+										var t = this.timeAdjust(note.head);
+										var n = _.modO_nejuer_ver1.tLoop;
+										var tLooped = t%n; // repeat every n microseconds
+										color[0] = (((tLooped/(n/1000))+_.modO_nejuer_ver1.hueRoot*1000)%1000)/1000;
+										color = hsla(color,color[3]);}
+									else if (_.modO_nejuer_ver1.mode === 2 && _.modO_nejuer_ver1.yLoop !== 0){
+										var color = hslaExtract(color);
+										var n = (_.modO_nejuer_ver1.yLoop/1000)*h;
+										var yLooped = ((h*(1-(_.judgeLineRaise/1000)))-y)%n; // repeat every n permille
+										color[0] = (((yLooped/(n/1000))+_.modO_nejuer_ver1.hueRoot*1000)%1000)/1000;
+										color = hsla(color,color[3]);}
 									
 									if (this.warningPreH > 0){
 										if (ctx.fillStyle !== this.laneWarningPreCoA[lane]){ctx.fillStyle = this.laneWarningPreCoA[lane];}
@@ -787,6 +801,7 @@ var KERN000006 = {
 				if (this.if(colornameA)){_.renderRegister("J","L");}
 				if (this.if("modO_hannanos_ver1")){_.renderRegister("hannanos_ver1");}
 				if (this.if("modO_Decon082_ver1")){_.renderRegister("Decon082_ver1");}
+				if (this.if("modO_nejuer_ver1")){_.renderRegister("N");}
 				if (this.if("tTentativeSignal") && _.tTentativeSignal !== N){_.jump(_.tTentative*_.duration);}
 				if (this.ifFull(["keyStateA","reset"]) && _.keyStateA.reset    === 1){_.jump(-_.introWaitTime);}
 				if (this.ifFull(["keyStateA","hi"   ]) && _.keyStateA.hi       === 1){_.state = "hi";this.changed({datA:[["state",_.state]]});}
@@ -872,6 +887,7 @@ var KERN000006 = {
 			["translateSignalO",KERNTypeO.object,KERNTypeO.signal],
 			["modO_hannanos_ver1",KERNTypeO.object,KERNTypeO.complex],
 			["modO_Decon082_ver1",KERNTypeO.object,KERNTypeO.array,KERNTypeO.object,KERNTypeO.complex],
+			["modO_nejuer_ver1",KERNTypeO.object,KERNTypeO.complex],
 			["tTentativeSignal",KERNTypeO.signal],
 			["tTentative",KERNTypeO.number],
 		].concat(colornameA.map(colorname=>[colorname,KERNTypeO.array,KERNTypeO.complex])));

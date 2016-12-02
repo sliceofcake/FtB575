@@ -35,10 +35,10 @@ var KERN000013 = {
 			refresh_SUB  : function(){var _ = this.o;
 				if (_.elO.aa.value !== _.txt){_.elO.aa.value = _.txt;}
 				µ.maCSS(document.head,this.base,µ.cssCompile({
-					[".KERN000013AA"+this.base] : "¥c:"+hsla(_.tx)+";¥fs:"+_.fs+"px;"+(_.lineWrap?"white-space:pre;":"white-space:normal;"),
+					[".KERN000013AA"+this.base] : "¥c:"+hsla(_.tx)+";¥fs:"+_.fs+"px;"+(_.lineWrap?"white-space:normal;":"white-space:pre;"),
 				}));},
 		});
-		oo.portInP .pushA([["txt",KERNTypeO.string],["fs",KERNTypeO.string]]);
+		oo.portInP .pushA([["txt",KERNTypeO.string],["fs",KERNTypeO.string],["lineWrap",KERNTypeO.boolean]]);
 		oo.portOutP.pushA([["txt",KERNTypeO.string],["fs",KERNTypeO.string]]);
 		return oo;},
 	};

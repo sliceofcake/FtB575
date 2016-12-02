@@ -1554,7 +1554,17 @@ var hslma      = (coArr,bgArr,      mixRatio =1,            a=1)=>hsla(hslmix(co
 var hslmma     = (coArr,bgArr,exArr,mixRatioA=1,mixRatioB=1,a=1)=>hslma(hslmix(coArr,bgArr,mixRatioA),exArr,mixRatioB,a);
 var hslmix     = (coArr,bgArr,      mixRatio =1                )=>rgbToHsl(rgbmix(hslToRgb(coArr),hslToRgb(bgArr),mixRatio)); // mix two colors in a specific ratio, ratio = co/bg
 var hslmegamix = (coArrArr                                     )=>rgbToHsl(rgbmegamix(coArrArr.map(v=>hslToRgb(v)))); // mix many colors equally
-var hslinvert  = (coArr                                        )=>{var _ = coArr[0]+0.5;return [(_>1?_-1:_),coArr[1],1-coArr[2]];}
+var hslinvert  = (coArr                                        )=>{var _ = coArr[0]+0.5;return [(_>1?_-1:_),coArr[1],1-coArr[2]];};
+
+var hslaExtract = (colorS)=>{
+	var co = [];
+	colorS.replace(/hsla?\((.+),(.+)%,(.+)%(?:,(.+))?\)/,(match,p1,p2,p3,p4,offset,string)=>{
+		co[0] = num(p1)/360;
+		co[1] = num(p2)/100;
+		co[2] = num(p3)/100;
+		if (typeof p4 !== "undefined"){
+			co[3] = num(p4);}});
+	return co;};
 
 // rgb land
 function rgbmix(coArr,bgArr,mixRatio=1){
