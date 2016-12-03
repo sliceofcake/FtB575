@@ -94,6 +94,7 @@ var KERN000006 = {
 				modO_Decon082_ver1  : {overlayA:[]},
 				modO_hannanos_ver1 : {bubbleF:1,textF:1,language:"english",durationT:1000000,lanexpaintEA:[],counter:0}, // bubbleF and textF should be booleans, but KERN3 sliders don't support that
 				modO_nejuer_ver1 : {mode:2,hueRoot:0,tLoop:3000000,yLoop:8000}, // mode:{0:off,1:temporal,2:physical}
+				modO_sliceofcake_ver1 : {op:1},
 				
 				// utilities [optimizations]
 				errorToScore : function(error,boundary=this.missBoundary){return (error>boundary)?0:Math.cos(Math.PI*error/(2*boundary))*boundary;},
@@ -429,6 +430,8 @@ var KERN000006 = {
 											? (this.noteActiveCoA[l])
 											: (this.noteFadedCoA[l]))
 										: (this.noteCoA[l]);
+									
+									// nejuer mod
 									if (_.modO_nejuer_ver1.mode === 1 && _.modO_nejuer_ver1.tLoop !== 0){
 										var color = hslaExtract(color);
 										var t = this.timeAdjust(note.head);
@@ -443,8 +446,21 @@ var KERN000006 = {
 										color[0] = (((yLooped/(n/1000))+_.modO_nejuer_ver1.hueRoot*1000)%1000)/1000;
 										color = hsla(color,color[3]);}
 									
+									// sliceofcake mod
+									if (_.modO_sliceofcake_ver1.op !== 1){
+										if (this.keyStateA[l] === 0){
+											color = hslaExtract(color);
+											color[3] = _.modO_sliceofcake_ver1.op;
+											color = hsla(color,color[3]);}}
+									
 									if (this.warningPreH > 0){
 										if (ctx.fillStyle !== this.laneWarningPreCoA[lane]){ctx.fillStyle = this.laneWarningPreCoA[lane];}
+										// sliceofcake mod
+										if (_.modO_sliceofcake_ver1.op !== 1){
+											if (this.keyStateA[l] === 0){
+												color2 = hslaExtract(ctx.fillStyle);
+												color2[3] = _.modO_sliceofcake_ver1.op;
+												ctx.fillStyle = hsla(color2,color2[3]);}}
 //										ctx.fillStyle = "yellow";
 										ctx.beginPath();
 										if (this.noteShape === "rectangle"){
@@ -456,6 +472,12 @@ var KERN000006 = {
 										ctx.fill();}
 									if (this.warningPostH > 0){
 										if (ctx.fillStyle !== this.laneWarningPostCoA[lane]){ctx.fillStyle = this.laneWarningPostCoA[lane];}
+										// sliceofcake mod
+										if (_.modO_sliceofcake_ver1.op !== 1){
+											if (this.keyStateA[l] === 0){
+												color2 = hslaExtract(ctx.fillStyle);
+												color2[3] = _.modO_sliceofcake_ver1.op;
+												ctx.fillStyle = hsla(color2,color2[3]);}}
 //										ctx.fillStyle = "red";
 										ctx.beginPath();
 										if (this.noteShape === "rectangle"){
@@ -802,6 +824,7 @@ var KERN000006 = {
 				if (this.if("modO_hannanos_ver1")){_.renderRegister("hannanos_ver1");}
 				if (this.if("modO_Decon082_ver1")){_.renderRegister("Decon082_ver1");}
 				if (this.if("modO_nejuer_ver1")){_.renderRegister("N");}
+				if (this.if("modO_sliceofcake_ver1")){_.renderRegister("N");}
 				if (this.if("tTentativeSignal") && _.tTentativeSignal !== N){_.jump(_.tTentative*_.duration);}
 				if (this.ifFull(["keyStateA","reset"]) && _.keyStateA.reset    === 1){_.jump(-_.introWaitTime);}
 				if (this.ifFull(["keyStateA","hi"   ]) && _.keyStateA.hi       === 1){_.state = "hi";this.changed({datA:[["state",_.state]]});}
@@ -888,6 +911,7 @@ var KERN000006 = {
 			["modO_hannanos_ver1",KERNTypeO.object,KERNTypeO.complex],
 			["modO_Decon082_ver1",KERNTypeO.object,KERNTypeO.array,KERNTypeO.object,KERNTypeO.complex],
 			["modO_nejuer_ver1",KERNTypeO.object,KERNTypeO.complex],
+			["modO_sliceofcake_ver1",KERNTypeO.object,KERNTypeO.complex],
 			["tTentativeSignal",KERNTypeO.signal],
 			["tTentative",KERNTypeO.number],
 		].concat(colornameA.map(colorname=>[colorname,KERNTypeO.array,KERNTypeO.complex])));

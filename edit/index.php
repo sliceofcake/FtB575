@@ -620,6 +620,16 @@ document.addEventListener("DOMContentLoaded",()=>{
 	elKERNLinkA.push({from:"tLoopNej0",to:"gameframe0",portA:[[["value" ],["modO_nejuer_ver1","tLoop"  ]]]});
 	elKERNLinkA.push({from:"yLoopNej0",to:"gameframe0",portA:[[["value" ],["modO_nejuer_ver1","yLoop"  ]]]});
 	
+	// sliceofcake's mod
+	p.shift("↑↑");
+	p.shift("←←");
+	l += 350;
+	var h = 30;
+	elKERNDimO["opacitySlice0"] = {w:200,h};
+	elKERNDimO.forEach(elKERNDim=>{elKERNDim.i = elKERNDim.h + p.handleH;});
+	/***/elKERNPreO[_="opacitySlice0"] = {partID:"KERN000005",title:"opacitySlice",initial:[["value",1],["dirAsc","E"],["ascRoot",0],["min",0],["max",1],["snap",0.1],["ascMode","additive"],["valueFxn",v=>(v*1000)+"‰"]]};p.preBuild();
+	elKERNLinkA.push({from:"opacitySlice0" ,to:"gameframe0",portA:[[["value"],["modO_sliceofcake_ver1","op"]]]});
+	
 	
 	
 	
