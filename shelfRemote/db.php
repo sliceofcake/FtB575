@@ -77,10 +77,14 @@ class DB{
 			else{break;}}
 		return T;}
 	//----
-	public static function rowChanged($tbl,$ID){
-		//file_exists();
-		//filemtime();
-	}
+	public static function calcModificationT($tbl,$ID){
+		if (!isS($tbl) || !vInA($tbl,self::$tblWhitelist)){self::$errA[] = "illegal tbl";return F;}
+		if (!isI($ID) || $ID < self::$IDMin || $ID > self::$IDMax){self::$errA[] = "illegal ID";return F;}
+		//----
+		$path = self::calcPathRow($tbl,$ID);if ($path === F){return F;}
+		clearstatcache(); // !!! for filemtime ... but I hope to someday rely on the cache
+		$secondC = @filemtime($path);if ($secondC === F){return F;}
+		return $secondC*1000000;}
 	//----
 	// for setup purposes, run before ever doing db stuff
 	public static function verifyFileStructure(){

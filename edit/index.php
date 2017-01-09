@@ -173,6 +173,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 	var h = 30;
 	elKERNDimO["gameframe0"     ] = {w:300,h:600};
 	elKERNDimO["score0"         ] = {w:350,h};
+	elKERNDimO["audioUrl0"      ] = {w:350,h};
 	elKERNDimO["audioFile0"     ] = {w:350,h};
 	elKERNDimO["chartFile0"     ] = {w:350,h};
 	elKERNDimO["chartAudio0"    ] = {w:350,h};
@@ -184,6 +185,8 @@ document.addEventListener("DOMContentLoaded",()=>{
 	elKERNDimO["gfScrollSpeed0" ] = {w:350,h};
 	elKERNDimO.forEach(elKERNDim=>{elKERNDim.i = elKERNDim.h + p.handleH;});
 	/***/elKERNPreO[_="score0"         ] = {partID:"KERN000014",title:"score"                     };p.preBuild();
+	p.shift("↓");
+	/***/elKERNPreO[_="audioUrl0"      ] = {partID:"KERN000013",title:"audio url",initial:[["lineWrap",F],["txt",""]]};p.preBuild();
 	p.shift("↓");
 	/***/elKERNPreO[_="audioFile0"     ] = {partID:"KERN000009",title:"audio file"  };p.preBuild();
 	p.shift("↓");
@@ -210,6 +213,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 	elKERNLinkA.push({from:"gameframe0",to:"chartAudio0",portA:[[["state"],["state"]],[["chartP"],["t"]],[["playbackRate"],["playbackRate"]],[["volume"],["volume"]]]});
 	elKERNLinkA.push({from:"gameframe0",to:"gfFtB4TransTarget0" ,portA:[[["translatedSO","FtB4"],["txt"]]]});
 	elKERNLinkA.push({from:"gameframe0",to:"gfo!m14TransTarget0",portA:[[["translatedSO","o!m14"],["txt"]]]});
+	elKERNLinkA.push({from:"audioUrl0"   ,to:"chartAudio0",portA:[[["txt"],["url"]]]});
 	elKERNLinkA.push({from:"audioFile0"  ,to:"chartAudio0",portA:[[["fil"],["fil"]]]});
 	elKERNLinkA.push({from:"chartFile0"  ,to:"gameframe0" ,portA:[[["fil"],["chartR"]]]});
 	elKERNLinkA.push({from:"audioLeeway0",to:"chartAudio0",portA:[[["value"],["leeway"]]]});
@@ -292,6 +296,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 	var w = 75;
 	var h = 45;
 	π.a(1,10).forEach(s=>{elKERNDimO["gfKey"+s] = {w,h};});
+	π.a(1,10).forEach(s=>{elKERNDimO["gfKey"+("editNote_"+s)] = {w,h};});
 	["reset","hi","hop↑","jump↑","pbr↑","spd↑","snap↑","vol↑","show","N/A","lo","hop↓","jump↓","pbr↓","spd↓","snap↓","vol↓","hide"].forEach(s=>{elKERNDimO["gfKey"+s] = {w,h};});
 	elKERNDimO.forEach(elKERNDim=>{elKERNDim.i = elKERNDim.h + p.handleH;});
 	// key bindings
@@ -301,7 +306,13 @@ document.addEventListener("DOMContentLoaded",()=>{
 		elKERNLinkA.push({from:"gfKey"+s,to:"gameframe0",portA:[[["state"],["keyStateA",s]]]});});
 	p.shift("↓");
 	p.shift("←←");
-	({"reset":48,"hi":81,"hop↑":38,"jump↑":39,"pbr↑":0,"spd↑":0,"snap↑":36,"vol↑":33,"show":88}).forEach((which,s)=>{
+	({1:49,2:50,3:51,4:52,5:53,6:54,7:55,8:56,9:57,10:48}).forEach((which,s)=>{s = "editNote_"+s;
+		/***/elKERNPreO[_="gfKey"+s] = {partID:"KERN000011",title:"k lane"+s,initial:[["which",which],["location",0]]};p.preBuild();
+		p.shift("→");
+		elKERNLinkA.push({from:"gfKey"+s,to:"gameframe0",portA:[[["state"],["keyStateA",s]]]});});
+	p.shift("↓");
+	p.shift("←←");
+	({"reset":79,"hi":81,"hop↑":38,"jump↑":39,"pbr↑":0,"spd↑":0,"snap↑":36,"vol↑":33,"show":88}).forEach((which,s)=>{
 		/***/elKERNPreO[_="gfKey"+s] = {partID:"KERN000011",title:"k "+s,initial:[["which",which],["location",0]]};p.preBuild();
 		p.shift("→");
 		switch (s){default    :elKERNLinkA.push({from:"gfKey"+s,to:"gameframe0"     ,portA:[[["state"],["keyStateA",s]]]});

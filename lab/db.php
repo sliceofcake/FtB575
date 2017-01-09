@@ -1,6 +1,7 @@
 <?
 require_once("/home/ftbsliceofcake2/gate/gate_575.php");
-
+//require_once("../shelfRemote/db.php");
+//echo DB::calcModificationT("chart",8044985937346956);
 die;die;die;
 
 require_once("../shelfRemote/mysql.php");

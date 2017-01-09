@@ -36,6 +36,9 @@
 						µ.qd(root.elP,root.cssReplKFxn("∑†slot-titleS input†new"       )).value = chart.titleS;
 						root.ll("fill info -> success");
 					},
+					coreRcvFxn : function(dat){
+						//ll("KERN000020:coreRcvFxn:",dat);
+					},
 				},
 				portInA  : [],
 				portOutA : [],
@@ -84,8 +87,8 @@
 					else{
 						return null;}},
 				validateFxnO : {},
-				stabilize_SUB : function(){var _ = this.o;},
-				setup_SUB     : function(){var _ = this.o;
+				stabilize_SUB : function(){var root = this;var _ = this.o;},
+				setup_SUB     : function(){var root = this;var _ = this.o;
 					µ.rr(this.elP,µ.m([[
 						["†root",[
 							["•brick†head",[
@@ -171,9 +174,11 @@
 							]],
 						]],
 					]],[v=>this.cssReplKFxn(v),v=>this.cssReplKTagFxn(v)]));
+					core.registerRcvCallbackAssert("KERN_"+root.counter,(function(root,_){return function(dat){_.coreRcvFxn(dat);};})(root,_));
 					},
-				refresh_SUB   : function(){var _ = this.o;},
-				destroy_SUB : function(){var _ = this.o;},
+				refresh_SUB   : function(){var root = this;var _ = this.o;;},
+				destroy_SUB : function(){var root = this;var _ = this.o;
+					core.registerRcvCallbackDessert("KERN_"+root.counter);},
 			};
 			return oo;},
 		};

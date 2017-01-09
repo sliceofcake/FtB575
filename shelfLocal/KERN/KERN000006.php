@@ -120,7 +120,15 @@ var KERN000006 = {
 				placeHit         : function({lane=1,head=0       }={}){this.lanexnoteA[lane].push({lane,head     ,started:F,ended:F});this.lanexnoteASort();},
 				placeHold        : function({lane=1,head=0,tail=0}={}){this.lanexnoteA[lane].push({lane,head,tail,started:F,ended:F});this.lanexnoteASort();},
 				removeNote       : function({lane=1,head=0       }={}){this.lanexnoteA[lane]=this.lanexnoteA[lane].filter(note=>!(note.lane===lane&&this.timeAdjust(note.head)===head));},
-				lanexnoteASort   : function(){this.lanexnoteA.forEach((noteA,lane)=>{noteA.sort((a,b)=>{var h=a.head-b.head;return (h!==0)?h:a.tail-b.tail;});});},
+				lanexnoteASort   : function(){
+					this.lanexnoteA.forEach((noteA,lane)=>{noteA.sort((a,b)=>{var h=a.head-b.head;return (h!==0)?h:a.tail-b.tail;});});
+					var sortCompareFxn   = (a,b)=>a.head-b.head;
+					var searchCompareFxn = (a,b)=>a     -b.head;
+					this.lanexnoteIndexHeadPairP = this.lanexnoteA.map(noteA=>new SortedArray({arr:noteA.map((note,index)=>({index,head:note.head})),sortCompareFxn,searchCompareFxn}));
+					var sortCompareFxn   = (a,b)=>a.tail-b.tail;
+					var searchCompareFxn = (a,b)=>a     -b.tail;
+					this.lanexnoteIndexTailPairP = this.lanexnoteA.map(noteA=>new SortedArray({arr:noteA.map((note,index)=>({index,tail:(typeof note.tail === "undefined"?note.head:note.tail)})),sortCompareFxn,searchCompareFxn}));
+					},
 				calcFinalTime    : function(){
 					var pass1 = F,pass2 = F;
 					if (this.snapA.length    > 0){pass1 = T;var finalHeadSnap = this.snapA[this.snapA.length-1].head;}
@@ -134,12 +142,14 @@ var KERN000006 = {
 				nearestSnapGroup : function(majorOnlyF=F){
 					if (this.snapMultiplier === 0 || this.snapA.length === 0){return {prev:null,curr:null,next:null};}
 					
+					var chartP = this.timeDejust(this.chartP);
+					
 					// t = snap.head + (snap.value * n)
 					// therefore, n = (t - snap.head) / snap.value
-					var snapCurrI = 0;for (var snapI = this.snapA.length-1; snapI >= 0; snapI--){var snap = this.snapA[snapI];if (snap.head <= this.chartP){snapCurrI = snapI;break;}}
+					var snapCurrI = 0;for (var snapI = this.snapA.length-1; snapI >= 0; snapI--){var snap = this.snapA[snapI];if (snap.head <= chartP){snapCurrI = snapI;break;}}
 					var snapCurr = this.snapA[snapCurrI];
 					var valueCurr = (snapCurr.value/(majorOnlyF?1:this.snapMultiplier)); // as in snap.value
-					var nCurr = (this.chartP - snapCurr.head) / valueCurr;
+					var nCurr = (chartP - snapCurr.head) / valueCurr;
 					var prevTentative,nextTentative; // values if they existed within the same snap group as curr
 					// exactly [nCurr is deemed close enough to a whole number]
 					//ll("---------------------------------------");
@@ -149,7 +159,7 @@ var KERN000006 = {
 					var exactF = F; // whether we are current on top of a snap, by design or by chance
 					if (Math.abs(Math.round(nCurr)-nCurr) < this.nSnapErrorTolerance){
 						nCurr = Math.round(nCurr);
-						curr = this.chartP;
+						curr = chartP;
 						exactF = T;}
 					else{
 						curr = N;}
@@ -160,7 +170,7 @@ var KERN000006 = {
 						// this will be the final snap of the previous snap group
 						var snapPrev = this.snapA[snapCurrI-1];
 						var valuePrev = (snapPrev.value/(majorOnlyF?1:this.snapMultiplier)); // as in snap.value
-						var nPrev = (this.chartP - snapPrev.head) / valuePrev;
+						var nPrev = (chartP - snapPrev.head) / valuePrev;
 						if (Math.abs(Math.round(nPrev)-nPrev) < this.nSnapErrorTolerance){nPrev = Math.round(nPrev);nPrev--;} // if we're at an overlapping valid line, nope, go back one more
 						var prev = snapPrev.head + (valuePrev * Math.floor(nPrev));}
 					
@@ -170,12 +180,18 @@ var KERN000006 = {
 						// this will be the head snap of the next snap group
 						var snapNext = this.snapA[snapCurrI+1];
 						next = snapNext.head;}
-					ll(this.chartP+" "+π.jsonE({prev,curr,next}));
+					ll(chartP+" "+π.jsonE({prev,curr,next}));
 					return {prev,curr,next};},
 				nearestSnapUp        : function(){return this.nearestSnapGroup().next;},
 				nearestSnapDown      : function(){return this.nearestSnapGroup().prev;},
 				nearestSnapMajorUp   : function(){return this.nearestSnapGroup(T).next;},
 				nearestSnapMajorDown : function(){return this.nearestSnapGroup(T).prev;},
+				nearestSnapAny       : function(){
+					var snapGroup = this.nearestSnapGroup();
+					if (snapGroup.curr !== N){return snapGroup.curr;}
+					return (this.chartP - snapGroup.prev < snapGroup.next - this.chartP)
+						? snapGroup.prev
+						: snapGroup.next;},
 				timeAdjust           : function(n){return n+this.noteOffset+this.errorOffset+this.syncOffset;},
 				timeDejust           : function(n){return n-this.noteOffset-this.errorOffset-this.syncOffset;},
 				renderRegister       : function(){for (var argument of arguments){this.renderRegisterA.pushUnique(argument);}},
@@ -578,12 +594,6 @@ var KERN000006 = {
 						_.scoreMax   = (_.hitC*_.missBoundary) + (_.holdC*_.missBoundary*2);
 						_.lanexnoteA = _.chartBox.noteA.map(note=>π.ooas(note,{started:F,ended:F})).distribute(note=>note.lane);
 						_.lanexnoteASort();
-						var sortCompareFxn   = (a,b)=>a.head-b.head;
-						var searchCompareFxn = (a,b)=>a     -b.head;
-						_.lanexnoteIndexHeadPairP = _.lanexnoteA.map(noteA=>new SortedArray({arr:noteA.map((note,index)=>({index,head:note.head})),sortCompareFxn,searchCompareFxn}));
-						var sortCompareFxn   = (a,b)=>a.tail-b.tail;
-						var searchCompareFxn = (a,b)=>a     -b.tail;
-						_.lanexnoteIndexTailPairP = _.lanexnoteA.map(noteA=>new SortedArray({arr:noteA.map((note,index)=>({index,tail:(typeof note.tail === "undefined"?note.head:note.tail)})),sortCompareFxn,searchCompareFxn}));
 						_.snapA = _.chartBox.bpmA;
 						_.snapA.sort((a,b)=>a.head-b.head);
 						_.snapA = _.snapA.filter(snap=>snap.value>0);
@@ -678,11 +688,23 @@ var KERN000006 = {
 					var noteRenderF = F;
 					if (_.hitC > 0 || _.holdC > 0){
 						_.noteInstantStatA.length = 0;
-						var noteChange = F;
+						var noteChangeF = F;
+						
+						for (var laneI = 1; laneI <= _.keyC; laneI++){var laneS = "editNote_"+str(laneI);
+							if (this.ifFull(["keyStateA",laneS])){
+								// keydown
+								if (_.keyStateA[laneS] === 1){
+									noteRenderF = T;
+									var snapN = _.nearestSnapAny();
+									if (_.lanexnoteA[laneI].some(note=>note.head === snapN)){
+										_.removeNote({lane:laneI,head:snapN});}
+									else{
+										_.placeHit({lane:laneI,head:snapN});}
+								}}}
 						for (var laneI = 1; laneI <= _.keyC; laneI++){var laneS = str(laneI);
 							if (this.ifFull(["keyStateA",laneS])){
 								// keydown
-								if         (_.keyStateA[laneS] === 1)  {
+								if (_.keyStateA[laneS] === 1){
 									//var tDebug_a = performance.now();
 									//lld(laneS+" down");
 									noteRenderF = T;
@@ -734,7 +756,7 @@ var KERN000006 = {
 											_.noteInstantStatA.push({whichEnd:"tail",note:π.cc(note),t:tDejusted,timeUntilExact:note.head-tDejusted,missBoundary:_.missBoundary});
 											_.earnedTailC++;
 											this.changed({datA:[["earnedTailC",_.earnedTailC]]});}
-										noteChange = T;}
+										noteChangeF = T;}
 									//var tDebug_b = performance.now();
 									//lld(Math.ceil((tDebug_b-tDebug_a)*1000)+"µs");
 									;}
@@ -771,7 +793,7 @@ var KERN000006 = {
 											_.noteInstantStatA.push({whichEnd:"tail",note:π.cc(note),t:tDejusted,timeUntilExact:note.tail-tDejusted,missBoundary:_.missBoundary});
 											_.earnedTailC++;
 											this.changed({datA:[["earnedTailC",_.earnedTailC]]});
-											noteChange = T;}}
+											noteChangeF = T;}}
 									
 									
 //									// use the closest note for the comparison
@@ -782,9 +804,9 @@ var KERN000006 = {
 //										//this.stat.push([noteI,0,err]);
 //										note.ended = T;
 //										_.noteInstantStatA.push({whichEnd:"tail",note:π.cc(note),t:tDejusted,timeUntilExact:note.tail-tDejusted,missBoundary:_.missBoundary});
-//										noteChange = T;}
+//										noteChangeF = T;}
 									;}}}
-						if (noteChange){
+						if (noteChangeF){
 							this.changed({datA:[["noteInstantStatA",_.noteInstantStatA]]});}
 					}
 					if (noteRenderF){

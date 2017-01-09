@@ -8,6 +8,9 @@ var core = {
 	POOR_QUALITY_MINIMUM_WAIT:3*1000000, // in microseconds, for people with a poor network connection
 	COMMAND_QUEUE_MAX_SIZE:99, // maximum commands on the waiting list before ignoring future ones
 	ROW_REFRESH_MAXIMUM_WAIT:5*60*1000000, // in microseconds, the most time we'll wait to refresh a row, even though the server reports that the row rarely changes [the server may enforce a max wait, but that doesn't mean that you can't do it too]
+	EVICT_DELTA_T:10*1000000, // evict entries that haven't been getRow()ed in this many microseconds
+	MAX_REFRESH_WAIT_DELTA_T:5*1000000, // if it's been this long since an entry was requested, request it again to see if there's newer data
+	MEMORY_ENTRY_C:0, // while storage memory usage is less than or equal to this many entries, no passive eviction will take place
 	//--------------------------------------------------------------------------------------------------
 	timeUpgrade       : (function(){var a,b;a=Date.now();b=performance.now();return(a-b)*1000;})(),
 	now               : function(){return Math.trunc(performance.now()*1000 + this.timeUpgrade);},
@@ -35,23 +38,110 @@ var core = {
 	storage           : {}, // a local swiss cheese copy of the database
 	reqxlocalPak      : {},
 	// !!! registration structure for process ID dependencies and callbacks on update
-	getRow : function(tbl,ID){ll("getRow : "+tbl+":"+ID);
-		var _ = this.storage;
-		if (typeof (_ = _[tbl]) === "undefined" || typeof (_ = _[ID]) === "undefined"){
-			this.requestRow(tbl,ID);
+	hasRow : function(tbl,ID){return (typeof this.storage[tbl] !== "undefined" && typeof this.storage[tbl][ID] !== "undefined" && typeof this.storage[tbl][ID].row !== "undefined");},
+	hasEntry : function(tbl,ID){return (typeof this.storage[tbl] !== "undefined" && typeof this.storage[tbl][ID] !== "undefined");},
+	getRow : function(tbl,ID,secretF=F){if (!secretF){ll("getRow : "+tbl+":"+ID);}
+		if (!secretF){
+			if (typeof this.storage[tbl]     === "undefined"){this.storage[tbl]     = {};}
+			if (typeof this.storage[tbl][ID] === "undefined"){this.storage[tbl][ID] = {};}
+			this.storage[tbl][ID].getLatestT = this.now();}
+		if (!this.hasRow(tbl,ID)){
+			if (!secretF){this.requestRowA(tbl,[ID]);}
 			return N;}
-		return _;},
-	requestRow : function(tbl,ID){
-		this.send({tbl,act:"get",dat:{IDA:[ID]},patientDeltaT:1000000,
-			successFxn:(function(that){return function(o){
-				if (typeof that.storage[o.mir.tbl] === "undefined"){that.storage[o.mir.tbl] = {};}
-				for (var i = 0; i < o.dat[o.mir.tbl].length; i++){var entry = o.dat[o.mir.tbl][i];
-					ll("Refreshed : "+o.mir.tbl+":"+entry.ID+" [will wait "+Math.floor(Math.max(0,Math.min(that.ROW_REFRESH_MAXIMUM_WAIT,entry._tStale-that.nowServer())/1000)/1000)+"seconds]");
-					that.storage[o.mir.tbl][entry.ID] = entry;
-					that.storage[o.mir.tbl][entry.ID]._tStaleTimeout = setTimeout((function(that,tbl,ID){return function(){that.requestRow(tbl,ID);};})(that,o.mir.tbl,entry.ID),Math.max(0,Math.min(that.ROW_REFRESH_MAXIMUM_WAIT,entry._tStale-that.nowServer())/1000));}
-			};})(this),
-			neutralFxn:(function(that){return function(o){that.notify("uhh, this thing just gave me a neutral return for storage, you might want to check that out");};})(this),
-			failureFxn:(function(that){return function(o){that.notify("failure return for storage");};})(this),});},
+		return this.storage[tbl][ID].row;},
+	getEntry : function(tbl,ID,secretF=F){
+		if (!secretF){
+			if (typeof this.storage[tbl]     === "undefined"){this.storage[tbl]     = {};}
+			if (typeof this.storage[tbl][ID] === "undefined"){this.storage[tbl][ID] = {};}
+			this.storage[tbl][ID].getLatestT = this.now();}
+		if (!this.hasEntry(tbl,ID)){return N;}
+		return this.storage[tbl][ID];},
+	requestRowA : function(tbl,IDA){ll("requestRowA : "+tbl+":"+π.jsonE(IDA));
+		var now = this.now();
+		// separate rows by ones we're initially getting and ones we're refreshing
+		var IDAO = IDA.distribute(ID=>{
+			if (typeof this.storage[tbl]     === "undefined"){this.storage[tbl]     = {};}
+			if (typeof this.storage[tbl][ID] === "undefined"){this.storage[tbl][ID] = {};}
+			var entry = this.storage[tbl][ID];
+			// we don't have any info, it's new
+			if (typeof entry.pendingT === "undefined"){entry.pendingT = now;return "initial";}
+			// we have pendingT info and it's not N, we're already waiting on this row don't ask for it again
+			if (typeof entry.pendingT !== "undefined" && entry.pendingT !== N){ll("HOLD YOUR HORSES "+tbl+" "+ID);return U;}
+			var row = (entry===N?N:(typeof entry.row === "undefined"?N:entry.row));
+			// we don't have the row, it's new
+			if (row === N){return "initial";}
+			// we don't have any refresh timing information, grudgingly let it through as if it's new
+			if (typeof row.t1 === "undefined"){return "initial";}
+			// default fallthrough to refresh
+			return "refresh";},["refresh","initial"]);
+		var successFxn = (function(that){return function(o){ll("success");
+			if (typeof that.storage[o.mir.tbl] === "undefined"){return F;} // row was deleted/killed while this request was busy
+			o.dat["fresh"][o.mir.tbl].forEach((row,ID)=>{//ll("fresh : "+o.mir.tbl+":"+ID);
+				if (!that.calcIsValidRowF(row)){return F;}
+				if (typeof that.storage[o.mir.tbl][ID] === "undefined"){return F;} // row was deleted/killed while this request was busy
+				//var waitT = Math.max(0,Math.min(that.ROW_REFRESH_MAXIMUM_WAIT,3000000));
+				that.storage[o.mir.tbl][ID].row = row;
+				that.storage[o.mir.tbl][ID].rcvLatestT = that.now();
+				that.storage[o.mir.tbl][ID].pendingT = N;
+				//that.storage[o.mir.tbl][ID]._tStaleTimeout = setTimeout((function(that,tbl,ID){return function(){
+				//	that.storage[tbl][ID].needsRefreshF = T;
+				//};})(that,o.mir.tbl,ID),waitT/1000);
+			});
+			o.dat["repeat"][o.mir.tbl].forEach((row,ID)=>{//ll("repeat : "+o.mir.tbl+":"+ID);
+				if (typeof that.storage[o.mir.tbl][ID] === "undefined"){return F;} // row was deleted/killed while this request was busy
+				that.storage[o.mir.tbl][ID].rcvLatestT = that.now();
+				that.storage[o.mir.tbl][ID].pendingT = N;
+				//var waitT = Math.max(0,Math.min(that.ROW_REFRESH_MAXIMUM_WAIT,3000000));
+				//that.storage[o.mir.tbl][ID]._tStaleTimeout = setTimeout((function(that,tbl,ID){return function(){
+				//	that.storage[tbl][ID].needsRefreshF = T;
+				//};})(that,o.mir.tbl,ID),waitT/1000);
+			});
+			o.dat["bad"][o.mir.tbl].forEach((row,ID)=>{//ll("bad : "+o.mir.tbl+":"+ID);
+				if (typeof that.storage[o.mir.tbl][ID] === "undefined"){return F;} // row was deleted/killed while this request was busy
+				that.storage[o.mir.tbl][ID].rcvLatestT = that.now();
+				that.storage[o.mir.tbl][ID].pendingT = N;
+				delete that.storage[o.mir.tbl][ID]; // delete-if-exists
+			});
+			that.registerRcvCallbackO.forEach(fxn=>{fxn(o.dat);});
+		};})(this);
+		var neutralFxn = (function(that){return function(o){ll("neutral");};})(this);
+		var failureFxn = (function(that){return function(o){ll("failure");};})(this);
+		// rows we're initially getting
+		if (IDAO["initial"].length >= 1){this.send({tbl,act:"get",dat:{_IDA:IDAO["initial"],modificationTA:[]},patientDeltaT:0,successFxn,neutralFxn,failureFxn});}
+		// rows we're refreshing
+		if (IDAO["refresh"].length >= 1){this.send({tbl,act:"get",dat:{_IDA:IDAO["refresh"],modificationTA:IDAO["refresh"].map(ID=>this.getRow(tbl,ID,T).t1)},patientDeltaT:0,successFxn,neutralFxn,failureFxn});}
+		},
+	registerRcvCallbackO : {},
+	registerRcvCallbackAssert : function(k,fxn){this.registerRcvCallbackO[k] = fxn;},
+	registerRcvCallbackDessert : function(k){delete this.registerRcvCallbackO[k];},
+	storageRefresh : function(){
+		if (!this.liveF){return;} // fail-fast : core stopped
+		
+		if (this.storage.mapV(entryO=>Object.keys(entryO).length).sum() > core.MEMORY_ENTRY_C){
+			// evict rows that haven't been asked for in a long time
+			this.storage.forEach((entryO,tbl)=>{
+				var len1 = Object.keys(this.storage[tbl]).length;
+				this.storage[tbl] = entryO.filter(entry=>entry.getLatestT+this.EVICT_DELTA_T>=this.now());
+				var len2 = Object.keys(this.storage[tbl]).length;
+				var lenDelta = len2-len1;
+				if (lenDelta < 0){ll("EVICTED "+(-lenDelta)+" ROWS");}
+			});}
+		
+		// foreach ID remaining, refresh rows that are considered stale
+		this.storage.forEach((entryO,tbl)=>{
+			var IDA = entryO.filter(entry=>entry.rcvLatestT+this.MAX_REFRESH_WAIT_DELTA_T<this.now()).mapV(entry=>entry.row._ID);
+			if (IDA.length >= 1){
+				ll("storageRefresh["+tbl+"] : "+π.jsonE(IDA));
+				this.requestRowA(tbl,IDA);}
+		});
+		
+		setTimeout((function(that){return function(){that.storageRefresh();};})(this),1000);},
+	calcIsValidRowF : function(m){
+		if (!isO(m)){return F;}
+		if (typeof m._ID !== "number"){return F;}
+		//if (typeof m.t0 !== "number"){return F;}
+		//if (typeof m.t1 !== "number"){return F;}
+		return T;},
 	// ask to queue up a command (no guarantees)
 	send:function(m=[]){
 		(isA(m) ? m : arguments).forEach(v=>{
@@ -78,7 +168,7 @@ var core = {
 			if (this.ntq < 0){
 				v.patientDeltaT = Math.max(v.patientDeltaT,this.POOR_QUALITY_MINIMUM_WAIT/1000);}
 			this.reqxlocalPak[this.req] = v;
-			if (v.patientDeltaT === 0){this.run();}
+			if (v.patientDeltaT < 0){this.run();}
 			else{this.patientTimeoutA.push(setTimeout((function(that){return function(){that.run();};})(this),v.patientDeltaT/1000));}});
 		return T;},
 	// run the commands in the queue, grouped into one batch
@@ -137,7 +227,8 @@ var core = {
 								break;case  1: that.reqxlocalPak[o.req].successFxn(o);
 								break;case  0: that.reqxlocalPak[o.req].neutralFxn(o);
 								break;case -1: that.reqxlocalPak[o.req].failureFxn(o);}
-							that.socketO["MU"]["post"](o);});
+							that.socketO["MU"]["post"](o);
+							delete that.reqxlocalPak[o.req];});
 						that.socketO["MU"]["postGlobal"](allData,this);
 						that.serverOffsetT = that.serverOffsetTA.average();}
 					else{
@@ -155,7 +246,8 @@ var core = {
 	cancel:function(){},
 	start:function(){
 		this.liveF = T;
-		this.run();},
+		this.run();
+		this.storageRefresh();},
 	stop:function(){
 		this.liveF = F;},
 }

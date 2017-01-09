@@ -48,7 +48,7 @@ var ø = {
 				+ "background-clip:padding-box;",
 			"*:hover,*:focus,*:active" : "transition-timing-function:linear;transition-duration:0s;transition-delay:0s;",
 			"html" : "¥s:1000‰;",
-			"body" : "¥s:1000‰;¥ff:Verdana,Geneva,sans-serif;¥fs:"+txHF+"px;¥p:0px;¥m:0px;¥c:var(--c);¥bgc:var(--bgc);¥bgi:url("+bgPath+");¥bgr:no-repeat;¥bgs:cover;¥bgo:content-box;¥bgp:center center;¥bga:fixed;¥o:hidden;",
+			"body" : "¥s:1000‰;¥ff:Verdana,Geneva,sans-serif;¥fs:"+txHF+"px;¥p:0px;¥m:0px;¥c:var(--c);¥bgc:var(--bgc);"/*¥bgi:url("+bgPath+");*/+"¥bgr:no-repeat;¥bgs:cover;¥bgo:content-box;¥bgp:center center;¥bga:fixed;¥o:hidden;",
 			"table" : "border-collapse:collapse;table-layout:fixed;", // the following: "table-layout:fixed;" uses the first row it encounters as the definitive widths for the entire table
 			"a,a:link,a:visited,.link"                : "¥:hand;¥c:"+hsla(co)        +";text-decoration:none;",
 			"a:hover,a:focus,.link:hover,.link:focus" : "¥:hand;¥c:"+hslma(co,tx,0.5)+";text-decoration:underline;",

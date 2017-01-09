@@ -4,10 +4,14 @@ require_once("/home/ftbsliceofcake2/gate/gate_575.php");
 mb_internal_encoding("UTF-8");
 require_once("butler.php");
 require_once("specific.php");
+// minimum safe integers:
+//    -9007199254740991 JavaScript, because every number is secretly a floating point value
 // maximum safe integers:
 //     9007199254740991 JavaScript, because every number is secretly a floating point value
 //  9223372036854775807 PHP, PHP_INT_MAX on 64-bit server
 // 18446744073709551615 MySQL, UNSIGNED BIGINT
+define("MIN_INT",-9007199254740991);
+define("MAX_INT", 9007199254740991);
 //======================================================================================================================
 // THIS INFORMATION MUST BE CHANGED BEFORE RELEASING
 // THIS INFORMATION MUST BE CHANGED BEFORE RELEASING

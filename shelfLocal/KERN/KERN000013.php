@@ -29,7 +29,7 @@ var KERN000013 = {
 			setup_SUB : function(){var _ = this.o;
 				µ.rr(this.elP,µ.m([[
 					[".KERN000013A"+this.base,{z:{KERN:this}},[
-						["textarea.KERN000013AA"+this.base],]]
+						["textarea.KERN000013AA"+this.base,{change:function(that){return function(){that.inbound({datA:[["txt",this.value]]});};}(this)}],]]
 				]]));
 				_.elO.aa = µ.qd(".KERN000013AA"+this.base);},
 			refresh_SUB  : function(){var _ = this.o;

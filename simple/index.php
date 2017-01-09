@@ -300,21 +300,20 @@ if ($tblE === F){fail("invalid tbl");}?>
 			else if ($import_act === "get"){
 				$req_get = MU_process([["tbl" => $import_tbl,"act" => "get","dat" => ["_IDA"=>[$import_id]],"who"=>intval($import_who),"plu"=>$import_plu]]);}
 			if ($req_get[0]["sta"] < 0){fail("error : ".$req_get[0]["msg"]);}
-			if (!isset($req_get[0]["dat"][$import_tbl][0])){fail("no entries");}
+			if (count($req_get[0]["dat"]["fresh"][$import_tbl]) === 0){fail("no entries");}
 			
 			// !!! hardcoded file downloads, deal with it until the next core
-			foreach ($req_get[0]["dat"][$import_tbl] as &$row){
+			foreach ($req_get[0]["dat"]["fresh"][$import_tbl] as $ID=>&$row){
 				if ($import_tbl === "chart"){
 					$row["txtR"] = "<a class=\"btn btn-primary\" href=\"".calcDBPath("external",$import_tbl,"txtR",$row["_ID"],$row["txtRExtension_DERIVED"])."\" download>download notes</a>";
 					if (kInA("icoRExtension_DERIVED",$row)){$row["icoR"] = "<a class=\"btn btn-primary\" href=\"".calcDBPath("external",$import_tbl,"icoR",$row["_ID"],$row["icoRExtension_DERIVED"])."\" download>download icon</a>";}}}unset($row);
 			
 			// some rows will have fewer columns than others, so get the max columns
 			$headerKA = [];
-			foreach ($req_get[0]["dat"][$import_tbl] as $row){
+			foreach ($req_get[0]["dat"]["fresh"][$import_tbl] as $ID=>$row){
 				foreach ($row as $k=>$v){
 					if (!in_array($k,$headerKA,TRUE)){
 						$headerKA[] = $k;}}}
-			
 			?>
 			<table class="table table-striped table-bordered" cellspacing="0" width="100%" style="display:none;">
 				<thead>
@@ -325,7 +324,7 @@ if ($tblE === F){fail("invalid tbl");}?>
 					</tr>
 				</thead>
 				<tbody><?
-			foreach ($req_get[0]["dat"][$import_tbl] as $row){?>
+			foreach ($req_get[0]["dat"]["fresh"][$import_tbl] as $ID=>$row){?>
 				<tr>
 					<?foreach ($headerKA as $k){?>
 					<td><?=(array_key_exists($k,$row)?str($row[$k]):"<span class=\"text-danger\">[missing/hidden]</span>");?></td>

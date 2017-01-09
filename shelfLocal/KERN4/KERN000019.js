@@ -6,66 +6,86 @@
 					// internal
 					elO      : {},
 					chartIDA : [],
-					datTranslation : {},
-					dat      : [],
+					userIDA  : [], // for optimization purposes, keeping track of which userIDs we are using
+					//....
+					rowHeightN : 20,
+					rowA     : [],
+					kAllowExtraF : F,
+					kMetaEO : {
+						"ico"             : {colN: 0,translationS:"icon"       ,requiredF:T,widthN: 20,type:"img"},
+						"titleS"          : {colN: 1,translationS:"song title" ,requiredF:T,widthN:200,},
+						"originS"         : {colN: 2,translationS:"song origin",requiredF:T,widthN:200,},
+						"userA"           : {colN: 3,translationS:"uploaders"  ,requiredF:T,widthN:150,},
+						"durationN"       : {colN: 4,translationS:"◷"          ,requiredF:T,widthN: 50,},
+						"npsN_DERIVED"    : {colN: 5,translationS:"♪/◷"        ,requiredF:T,widthN: 50,},
+						"formatS_DERIVED" : {colN: 6,translationS:"format"     ,requiredF:T,widthN: 50,},
+						"laneC_DERIVED"   : {colN: 7,translationS:"◨"          ,requiredF:T,widthN: 50,},
+						"txt"             : {colN: 8,translationS:"notes file" ,requiredF:T,widthN: 50,type:"dl"},
+						"infoAudioS"      : {colN: 9,translationS:"audio info" ,requiredF:T,widthN:300,},
+						"infoS"           : {colN:10,translationS:"info"       ,requiredF:T,widthN:300,},},
+					westColStuckN : 2,
+					eastColStuckN : 0,
+					//....
 					// imports and exports
 					// utilities
 					chartIDAGet : function(){var root = this.root;var _ = this;
 						root.ll("get chart list -> ...");
-						core.send({tbl:"n/a",act:"FtB575_1|chart_list",
+						core.send({tbl:"chart",act:"dmp",
 							successFxn:(function(that){return function(o){
 								root.ll("get chart list -> success");
-								_.chartIDA = o.dat.chartIDA;
+								_.chartIDA = o.dat._IDA;
 								_.fill();
 							};})(root,_),
 							failureFxn:(function(that){return function(o){var root = that;var _ = that.o;root.ll("get chart list -> "+o.msg);};})(root),});
 					},
 					fill:function(){var root = this.root;var _ = this;
 						root.ll("fill info -> ...");
-						var chartA = _.chartIDA.mapFilter(chartID=>core.getRow("chart",chartID),N);
-						var elA = chartA.map(chart=>{
-							if (chart === N){
-								return ["†chart-card†multi-column",[
-									["†slot-ID"             ,""],
-									["†slot-userID"         ,""],
-									["†slot-titleS"         ,""],
-									["†slot-originS"        ,""],
-									["†slot-durationN"      ,""],
-									["†slot-npsN_DERIVED"   ,""],
-									["†slot-formatS_DERIVED",""],
-									["†slot-laneC_DERIVED"  ,""],
-								]];}
-							else{
-								var user_charter = core.getRow("user",chart.userID);
-								return ["†chart-card†multi-column",[
-									["†slot-ID"             ,chart.ID             ],
-									["†slot-userID"         ,(user_charter===N?"":user_charter.nameS)],
-									["†slot-titleS"         ,chart.titleS         ],
-									["†slot-originS"        ,chart.originS        ],
-									["†slot-durationN"      ,Math.ceil(chart.durationN/1000000)],
-									["†slot-npsN_DERIVED"   ,chart.npsN_DERIVED   ],
-									["†slot-formatS_DERIVED",chart.formatS_DERIVED],
-									["†slot-laneC_DERIVED"  ,chart.laneC_DERIVED  ],
-								]];}
+						_.rowA = _.chartIDA.mapFilter(chartID=>{
+							var chart = core.getRow("chart",chartID);
+							if (chart === N){return U;}
+							return chart.mapO((v,k)=>{
+								switch (k){default:return {[k]:v};
+									break;case "icoRExtension_DERIVED":
+										return {"ico":{filenameS:"FtB575_chart_"+str(chartID)+"_ico"+v,src:"../file/?tbl="+encodeURIComponent("chart")+"&propertyS="+encodeURIComponent("icoR")+"&ID="+encodeURIComponent(str(chartID))+"&extension="+encodeURIComponent(v)}};
+									break;case "txtRExtension_DERIVED":
+										return {"txt":{filenameS:"FtB575_chart_"+str(chartID)+"_txt"+v,src:"../file/?tbl="+encodeURIComponent("chart")+"&propertyS="+encodeURIComponent("txtR")+"&ID="+encodeURIComponent(str(chartID))+"&extension="+encodeURIComponent(v)}};
+									break;case "_userIDA_charter":
+										return {"userA":v.map(userID=>{
+											_.userIDA.pushUnique(userID); // !!! use a sorted array sometime
+											var user_charter = core.getRow("user",userID);
+											if (user_charter === N){return "???";}
+											if (typeof user_charter.nameS === "undefined"){return "???";}
+											return user_charter.nameS;
+										}).join(" | ")};
+									break;case "durationN":
+										return {[k]:Math.ceil(v/1000000)+"◷"};
+								}
+							});
 						});
-						_.datTranslation = {
-							"ID"             :"ID"         ,
-							"userID"         :"uploader"   ,
-							"titleS"         :"song title" ,
-							"originS"        :"song origin",
-							"durationN"      :"◷"          ,
-							"npsN_DERIVED"   :"♪/◷"        ,
-							"formatS_DERIVED":"format"     ,
-							"laneC_DERIVED"  :"◨"          ,};
-						_.dat = chartA;
-						root.changed(["datTranslation"],["dat"]);
+						root.changed(["rowHeightN"],["rowA"],["kAllowExtraF"],["kMetaEO"],["westColStuckN"],["eastColStuckN"]);
 						root.export();
-						µ.rr(µ.qd(root.elP,root.cssReplKFxn("¶†root>†main")),µ.m([elA],[v=>root.cssReplKFxn(v),v=>root.cssReplKTagFxn(v)]));
+						//µ.rr(µ.qd(root.elP,root.cssReplKFxn("¶†root>†main")),µ.m([elA],[v=>root.cssReplKFxn(v),v=>root.cssReplKTagFxn(v)]));
 						root.ll("fill info -> success");
+					},
+					coreRcvFxn : function(dat){var root = this.root;var _ = this;
+						dat.forEach((tblxrowA,type)=>{
+							switch (type){default:;
+								break;case "fresh":
+									//ll(type,tblxrowA);
+									tblxrowA.forEach((rowA,tbl)=>{//ll(tbl,rowA);
+										var IDA = rowA.mapV(row=>row._ID);
+										switch (tbl){default:;
+											break;case "chart":if (π.aaIntersect(IDA,_.chartIDA)){/*ll("KERN000019:coreRcvFxn:chart");*/_.fill();}
+											break;case "user" :if (π.aaIntersect(IDA,_.userIDA )){/*ll("KERN000019:coreRcvFxn:user" );*/_.fill();}
+											}
+									});
+								break;case "repeat":;
+								break;case "bad":;}
+						});
 					},
 				},
 				portInA  : [],
-				portOutA : [["dat",KERN.typeO.complexReference],["datTranslation",KERN.typeO.complexReference]],
+				portOutA : [["rowHeightN",KERN.typeO.number],["rowA",KERN.typeO.complexReference],["kAllowExtraF",KERN.typeO.flag],["kMetaEO",KERN.typeO.complexReference],["westColStuckN",KERN.typeO.number],["eastColStuckN",KERN.typeO.number]],
 				//•ping - faux-class, actual name prepended with partID
 				//†ping - faux-¥, actual name prepended with partID and something else
 				//∑ - [standalone] of this partID
@@ -97,20 +117,9 @@
 					"•double-column>:nth-child(2)" : "¥:block;¥w:500‰;¥h:1000‰;¥f:left;",
 					"•brick"  : "¥w:1000‰;",
 					"†chart-card" : "¥w:1000‰;¥h:52px;",
-					"†multi-column:nth-child(1)" : "¥:flex-row;¥pt:"+py+"px;",
-					"†multi-column"   : "¥pb:"+py+"px;",
-					"†multi-column>*" : "¥f:left;¥pr:"+px+"px;¥hmin:1px;", // ¥hmin:1px hack to have width on empty element
-					"†multi-column>:nth-child(1)" : "¥float:left;¥pl:"+px+"px;",
-					"†multi-column>†slot-ID"              : "¥w:"+(wO.ID            +px+px)+"px;text-align:right;¥:one-row;",
-					"†multi-column>†slot-userID"          : "¥w:"+(wO.userID           +px)+"px;text-align:left;¥:one-row;",
-					"†multi-column>†slot-titleS"          : "¥w:"+(wO.titleS              )+  ";text-align:left;¥:one-row;",
-					"†multi-column>†slot-originS"         : "¥w:"+(wO.originS             )+  ";text-align:left;¥:one-row;",
-					"†multi-column>†slot-durationN"       : "¥w:"+(wO.durationN_DERIVED+px)+"px;text-align:right;¥:one-row;",
-					"†multi-column>†slot-npsN_DERIVED"    : "¥w:"+(wO.npsN_DERIVED     +px)+"px;text-align:right;¥:one-row;",
-					"†multi-column>†slot-formatS_DERIVED" : "¥w:"+(wO.formatS_DERIVED  +px)+"px;text-align:left;¥:one-row;",
-					"†multi-column>†slot-laneC_DERIVED"   : "¥w:"+(wO.laneC_DERIVED    +px)+"px;text-align:right;¥:one-row;",
-					"†head"   : "¥w:1000‰;¥h:89px;¥o:auto;",
+					"†head"   : "¥w:1000‰;¥h:55px;¥o:auto;",
 					"†main"   : "¥w:1000‰;¥h:calc(1000‰ - 89px - 0px);¥o:auto;",
+					"†table-a" : "¥s:1000‰;",
 					"†foot"   : "¥w:1000‰;¥h:0px;¥o:auto;",
 				});},
 				genUniqueCSSO : function(elMissingF){var root = this;var _ = this.o;
@@ -135,19 +144,10 @@
 									["•title","Chart Search"],
 									µ.bscss("refresh",[".button",{click:(function(that){return function(){var root = that;var _ = that.o;_.chartIDAGet();};})(root)}],"†refresh"),
 								]],
-								["•brick†table-a"],
-								["•brick†multi-column",[
-									["†slot-ID"             ,"ID"              ],
-									["†slot-userID"         ,"uploader"        ],
-									["†slot-titleS"         ,"song title"      ],
-									["†slot-originS"        ,"song origin"     ],
-									["†slot-durationN"      ,"◷"     ],
-									["†slot-npsN_DERIVED"   ,"♪/◷"   ],
-									["†slot-formatS_DERIVED","format"],
-									["†slot-laneC_DERIVED"  ,"◨"     ],
-								]],
 							]],
-							["•brick†main",[]],
+							["•brick†main",[
+								["•brick†table-a"],
+							]],
 							["•brick†foot",[]],
 							
 						]],
@@ -155,10 +155,12 @@
 					
 					var ID = π.genID();
 					p.elKERNO["subKERN"+ID] = KERN.create({partID:"KERN000023",elP:µ.qd(root.cssReplKFxn("¶†table-a"))});
-					root.registerAssert({rcvRoot:p.elKERNO["subKERN"+ID],portA:[[["dat"],["dat"]],[["datTranslation"],["datTranslation"]]]});
+					root.registerAssert({rcvRoot:p.elKERNO["subKERN"+ID],portA:[[["rowHeightN"],["rowHeightN"]],[["rowA"],["rowA"]],[["kAllowExtraF"],["kAllowExtraF"]],[["kMetaEO"],["kMetaEO"]],[["westColStuckN"],["westColStuckN"]],[["eastColStuckN"],["eastColStuckN"]]]});
+					core.registerRcvCallbackAssert("KERN_"+root.counter,(function(root,_){return function(dat){_.coreRcvFxn(dat);};})(root,_));
 					},
 				refresh_SUB   : function(){var root = this;var _ = this.o;},
-				destroy_SUB : function(){var root = this;var _ = this.o;},
+				destroy_SUB : function(){var root = this;var _ = this.o;
+					core.registerRcvCallbackDessert("KERN_"+root.counter);},
 			};
 			return oo;},
 		};

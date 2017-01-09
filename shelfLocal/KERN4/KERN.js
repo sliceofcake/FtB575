@@ -592,6 +592,7 @@ var KERN;
 				refresh_SUB   : function(){},
 				refresh       : function(){if (KERN.debugF){var startT = KERN.now();KERN.ll(KERN.debugIndentS.repeat(KERN.debugIndentLevel)+"v refresh "+this.name+"_"+this.counter);KERN.debugIndentLevel++;}
 					var _ = this.o;
+					this.refresh_SUB(); // this is above the CSS stuff so that we can make variable edits here that will be picked up by the CSS stuff, sloppily
 					var elCSS = document.head.querySelector("style["+KERN.pcv.elCSSUniqueAttributeK+"='"+KERN.pcv.elCSSUniqueAttributeVFxn(this)+"']");
 					var elMissingF = (elCSS === null);
 					var cssO = this.genUniqueCSSO(elMissingF);
@@ -605,7 +606,6 @@ var KERN;
 						elCSS.textContent = cssS;
 						if (elMissingF){
 							document.head.appendChild(elCSS);}}
-					this.refresh_SUB();
 					if (KERN.debugF){var endT = KERN.now();KERN.debugIndentLevel--;if (endT - startT > KERN.debugMicrosecondTolerance){KERN.ll(KERN.debugIndentS.repeat(KERN.debugIndentLevel)+"^ refresh "+this.name+"_"+this.counter+" "+(endT-startT)+"µs");}}},
 				
 				drawFrame_SUB : function(now){},

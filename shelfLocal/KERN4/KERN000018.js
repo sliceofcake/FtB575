@@ -20,8 +20,8 @@
 						_.user_plushieID = 0;
 						root.changed(["userID"]);
 						root.export();},
-					userCardRenderFxn : function(){var root = this.root;var _ = this;ll("userCardRenderFxn");
-						var user = core.getRow("user",_.userID);
+					userCardRenderFxn : function(){var root = this.root;var _ = this;//ll("userCardRenderFxn");
+						var user = _.userID===0?N:core.getRow("user",_.userID);
 						var el = µ.qd(root.cssReplKFxn("∑†user-card>†user-card>†info"));
 						if (user === N){el.textContent = "";return;}
 						//{"ID":6349748301655246,"nameS":"sliceofcake","hTxN":346,"sTxN":1000,"lTxN":1000,"aTxN":1000,"hCoN":346,"sCoN":1000,"lCoN":500,"aCoN":1000,"hBgN":346,"sBgN":0,"lBgN":0,"aBgN":900,"bioS":"","divisionS":"","t0":1477628863376625}
@@ -31,6 +31,9 @@
 						+"text color : hsla("+user.hTxN+"‰,"+user.sTxN+"‰,"+user.lTxN+"‰,"+user.aTxN+"‰)<br>"
 						+"main color : hsla("+user.hCoN+"‰,"+user.sCoN+"‰,"+user.lCoN+"‰,"+user.aCoN+"‰)<br>"
 						+"background color : hsla("+user.hBgN+"‰,"+user.sBgN+"‰,"+user.lBgN+"‰,"+user.aBgN+"‰)<br>";},
+					coreRcvFxn : function(dat){
+						//ll("KERN000018:coreRcvFxn:",dat);
+					},
 				},
 				portInA  : [],
 				portOutA : [["userID",KERN.typeO.number]],
@@ -66,8 +69,8 @@
 					else{
 						return null;}},
 				validateFxnO : {},
-				stabilize_SUB : function(){var _ = this.o;},
-				setup_SUB     : function(){var _ = this.o;
+				stabilize_SUB : function(){var root = this;var _ = this.o;},
+				setup_SUB     : function(){var root = this;var _ = this.o;
 					µ.rr(this.elP,µ.m([[
 						["†root",[
 							["•brick†user-card",[
@@ -133,13 +136,16 @@
 							]],
 						]],
 					]],[v=>this.cssReplKFxn(v),v=>this.cssReplKTagFxn(v)]));
-					_.intervalHandleMessageGet = π.intervalCall(5000000,()=>{var _ = this.o;
+					_.intervalHandleMessageGet = π.intervalCall(5000000,()=>{var root = this;var _ = this.o;
 						core.send({tbl:"n/a",act:"KERN|who_am_i",
 							successFxn:o=>{_.whoAmISuccessFxn(o);},
 							failureFxn:o=>{_.whoAmIFailureFxn(o);},});
-					});},
-				refresh_SUB   : function(){var _ = this.o;},
-				destroy_SUB : function(){var _ = this.o;
+					});
+					core.registerRcvCallbackAssert("KERN_"+root.counter,(function(root,_){return function(dat){_.coreRcvFxn(dat);};})(root,_));
+					},
+				refresh_SUB   : function(){var root = this;var _ = this.o;},
+				destroy_SUB : function(){var root = this;var _ = this.o;
+					core.registerRcvCallbackDessert("KERN_"+root.counter);
 					π.intervalClear(_.intervalHandleMessageGet);},
 			};
 			return oo;},

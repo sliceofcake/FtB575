@@ -262,30 +262,33 @@ var µ = {
 				var o0 = o[0];qReplFxnA.forEach(qReplFxn=>{o0 = qReplFxn(o0);});
 				oo = this.qcnv(o0);
 				oo.html = (typeof o[1] === "number") ? o[1].toString() : o[1];}
-			// [query:"",listenerO+z:{},html:""]
+			// [query:"",listenerO+z+d:{},html:""]
 			else if (o.length === 3 && typeof o[0] === "string" && typeof o[1] === "object" && !isA(o[1]) && (typeof o[2] === "string" || typeof o[2] === "number")){
 				var o0 = o[0];qReplFxnA.forEach(qReplFxn=>{o0 = qReplFxn(o0);});
 				oo = this.qcnv(o0);
 				oo.listenerO = o[1];//π.cc(o[1]);
 				if (typeof o[1].z !== "undefined"){oo.z = o[1].z;delete oo.listenerO.z;}
+				if (typeof o[1].d !== "undefined"){if (typeof oo.d === "undefined"){oo.d = o[1].d;}else{π.ooa(oo.d,o[1].d);}delete oo.listenerO.d;} // d properties force override, so don't redundantly specify them e.g. in the query section and the d section
 				oo.html = (typeof o[2] === "number") ? o[2].toString() : o[2];}
 			// [query:"",childA:[]]
 			else if (o.length === 2 && typeof o[0] === "string" && typeof o[1] === "object" && isA(o[1])){
 				var o0 = o[0];qReplFxnA.forEach(qReplFxn=>{o0 = qReplFxn(o0);});
 				oo = this.qcnv(o0);
 				oo.childA = o[1];}
-			// [query:"",listenerO+z:{}]
+			// [query:"",listenerO+z+d:{}]
 			else if (o.length === 2 && typeof o[0] === "string" && typeof o[1] === "object" && !isA(o[1])){
 				var o0 = o[0];qReplFxnA.forEach(qReplFxn=>{o0 = qReplFxn(o0);});
 				oo = this.qcnv(o0);
 				oo.listenerO = o[1];//π.cc(o[1]);
-				if (typeof o[1].z !== "undefined"){oo.z = o[1].z;delete oo.listenerO.z;}}
-			// [query:"",listenerO+z:{},childA:[]]
+				if (typeof o[1].z !== "undefined"){oo.z = o[1].z;delete oo.listenerO.z;}
+				if (typeof o[1].d !== "undefined"){if (typeof oo.d === "undefined"){oo.d = o[1].d;}else{π.ooa(oo.d,o[1].d);}delete oo.listenerO.d;}}
+			// [query:"",listenerO+z+d:{},childA:[]]
 			else if (o.length === 3 && typeof o[0] === "string" && typeof o[1] === "object" && !isA(o[1]) && typeof o[2] === "object" && isA(o[2])){
 				var o0 = o[0];qReplFxnA.forEach(qReplFxn=>{o0 = qReplFxn(o0);});
 				oo = this.qcnv(o0);
 				oo.listenerO = o[1];//π.cc(o[1]);
 				if (typeof o[1].z !== "undefined"){oo.z = o[1].z;delete oo.listenerO.z;}
+				if (typeof o[1].d !== "undefined"){if (typeof oo.d === "undefined"){oo.d = o[1].d;}else{π.ooa(oo.d,o[1].d);}delete oo.listenerO.d;}
 				oo.childA = o[2];}
 			o = oo;}
 		if (typeof o !== "object"){console.log("******* µ.m FAILURE : "+typeof o+" : "+o);}
@@ -568,7 +571,6 @@ var µ = {
 				case "bgi" :return "background-image:"+p2+";";
 				case "bsw" :return "box-shadow:"+p2+";";
 				case "tsw" :return "text-shadow:"+p2+";";
-				case "z"   :return "z-index:"+p2+";";
 				case "f"   :return "float:"+p2+";";
 				case "fs"  :return "font-size:"+p2+";";
 				case "ff"  :return "font-family:"+p2+";";
@@ -870,7 +872,7 @@ var π = {
 	aaIntersect:function(a,aa){
 		for (var i = 0; i < a.length; i++){
 			for (var ii = 0; ii < aa.length; ii++){
-				if (a[i] === b[ii]){return T;}}}
+				if (a[i] === aa[ii]){return T;}}}
 		return F;},
 	// no intersections exist with two arrays
 	// !!! untested
@@ -1037,9 +1039,9 @@ var π = {
 			downloadLink.style.display = "none";
 			document.body.appendChild(downloadLink);}
 		downloadLink.click();},
-	saveLinkAsFile : function(url){
+	saveLinkAsFile : function(url,filenameS="File#"+Math.trunc(Math.random()*1000000)){
 		var downloadLink = document.createElement("a");
-		downloadLink.download = "File#"+Math.trunc(Math.random()*1000000);
+		downloadLink.download = filenameS;
 		downloadLink.innerHTML = "Download File";
 		if (window.URL != null){
 			// Chrome allows the link to be clicked
@@ -1292,7 +1294,7 @@ var π = {
 
 // they told me not to, but I did it anyway
 // make this faster
-Array.prototype.makeUnique = function(){
+Array.prototype.makeUniqueX = function(){
 	var res = [];
 	for (var I = 0,C = this.length; I < C; I++){
 		res.pushUnique(this[I]);}
@@ -1353,8 +1355,8 @@ Array.prototype.split = function(m){
 			r.push(π.cc(this[i]));}}
 	res.push(r);
 	return res;};
-Array.prototype.distribute = function(fxn){
-	var o = {};
+Array.prototype.distribute = function(fxn,kInitA=[]){
+	var o = kInitA.mapO(k=>({[k]:[]}));
 	this.forEach((v,i,a)=>{
 		var k = fxn(v,i,a);
 		if (typeof k === "undefined"){return;} // signal to toss out this value
@@ -1434,17 +1436,31 @@ Array.prototype.findIndexRandom = function(fxn){
 	var thisC = this.length;
 	if (thisC === 0){return -1;}
 	return Math.floor(Math.random()*thisC);};
-Object.prototype.mapK = function(fxn){return Object.keys  (this.map(fxn));};
-Object.prototype.mapV = function(fxn){return Object.values(this.map(fxn));};
-Object.prototype.mapO = function(fxn){ // fxn returns {key:value} instead of just value as in the traditional map
-	return this.mapV(fxn).reduce((p,v)=>π.ooAbsorb(p,v),{});};
-Object.prototype.map = function(fxn){
+Object.prototype.mapK       = function(fxn         ){return Object.keys  (this.map      (fxn       ));};
+Object.prototype.mapFilterK = function(fxn,vBlank=U){return Object.keys  (this.mapFilter(fxn,vBlank));};
+Object.prototype.mapV       = function(fxn         ){return Object.values(this.map      (fxn       ));};
+Object.prototype.mapFilterV = function(fxn,vBlank=U){return Object.values(this.mapFilter(fxn,vBlank));};
+// fxn returns {key:value} instead of just value as in the traditional map
+Object.prototype.mapO       = function(fxn         ){return this.mapV      (fxn       ).reduce((p,v)=>π.ooa(p,v),{});};
+Object.prototype.mapFilterO = function(fxn,vBlank=U){return this.mapFilterV(fxn,vBlank).reduce((p,v)=>π.ooa(p,v),{});};
+Object.prototype.map        = function(fxn){
 	var o = {};
 	var keyA = Object.keys(this);
 	var length = keyA.length;
 	for (var i = 0; i < keyA.length; i++){var k = keyA[i];
 		o[k] = fxn(this[k],k,this);}
 	return o;};
+Object.prototype.mapFilter  = function(fxn,vBlank=U){
+	var o = {};
+	var keyA = Object.keys(this);
+	var length = keyA.length;
+	for (var i = 0; i < keyA.length; i++){var k = keyA[i];var v = this[k];
+		if (v !== vBlank){
+			o[k] = fxn(v,k,this);}}
+	return o;};
+
+
+
 Object.prototype.reduce = function(fxn,initial){
 	if (typeof initial !== "undefined"){accumulator = initial;}
 	var keyA = Object.keys(this);

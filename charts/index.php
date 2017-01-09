@@ -53,9 +53,9 @@ document.addEventListener("DOMContentLoaded",()=>{
 	//----
 	
 	p.registerPart({k:"auth1",titleS:"Authentication"   ,t: 10,l: 10,w:400,h:230,z:1,datO:{partID:"KERN000018",datA:[]}});
-	p.registerPart({k:"edit1",titleS:"Chart Submit/Edit",t:250,l: 10,w:500,h:400,z:2,datO:{partID:"KERN000020",datA:[]}});
-	p.registerPart({k:"chrt1",titleS:"Chart Search"     ,t: 10,l:420,w:600,h:400,z:3,datO:{partID:"KERN000019",datA:[]}});
-	p.registerPart({k:"chrt2",titleS:"Chart Search #2"  ,t:320,l:520,w:600,h:400,z:4,datO:{partID:"KERN000019",datA:[]}});
+	p.registerPart({k:"edit1",titleS:"Chart Submit/Edit",t: 10,l:420,w:500,h:400,z:2,datO:{partID:"KERN000020",datA:[]}});
+	p.registerPart({k:"chrt1",titleS:"Chart Search"     ,t:250,l: 10,w:800,h:400,z:3,datO:{partID:"KERN000019",datA:[]}});
+	p.registerPart({k:"chrt2",titleS:"Chart Search #2"  ,t:320,l:120,w:800,h:400,z:4,datO:{partID:"KERN000019",datA:[]}});
 	p.tx = [0,1,1,1];
 	p.co = [0,1,0.5,1];
 	p.bg = [0,0,0,0.65];

@@ -115,8 +115,13 @@ function MU_fxn(&$p,&$o,&$in){global $MU_TABLE;
 			
 			//---- GET ----
 			break;case "get":
-				$vt = ["_IDA" => ["type"=>"intarr","minC"=>1,"maxC"=>1000,"min"=>DB::$IDMin,"max"=>DB::$IDMax,"requiredNow"=>T,"help"=>"The unique IDs of the desired entities."],];
+				$vt = ["_IDA"           => ["type"=>"intarr","minC"=>1,"maxC"=>1000,"min"=>DB::$IDMin,"max"=>DB::$IDMax,"requiredNow"=>T,"help"=>"The unique IDs of the desired entities."],
+				       "modificationTA" => ["type"=>"intarr","minC"=>0,"maxC"=>1000,"min"=>MIN_INT   ,"max"=>MAX_INT   ,"requiredNow"=>F,"help"=>"The microsecond timestamp when the row was last modified."],];
 				$statusF = vc6($p,$vt);if ($statusF === F){return F;}
+				$modificationModeF = (kInA("modificationTA",$d) && count($d["modificationTA"]) !== 0);
+				if ($modificationModeF && count($d["_IDA"]) !== count($d["modificationTA"])){
+					SET_RETURN_MSG("ERROR : MODIFICATIONTA COUNT DOESN'T MATCH _IDA COUNT");return F;}
+				
 				//....
 				switch ($p["tbl"]){default:;
 					break;case "board"     :;
@@ -132,23 +137,34 @@ function MU_fxn(&$p,&$o,&$in){global $MU_TABLE;
 					break;case "user"      :;
 				}
 				//....
-				$o["dat"][$p["tbl"]] = π_mapFilter($d["_IDA"],function($ID)use(&$p){return DB::get($p["tbl"],$ID);},F);
+				$IDO_fresh  = [];
+				$IDO_repeat = [];
+				$IDO_bad    = [];
+				foreach ($d["_IDA"] as $i=>$ID){
+					if ($modificationModeF && DB::calcModificationT($p["tbl"],$ID) <= $d["modificationTA"][$i]+1000000){ // !!! 1-second precision on modification time, so add slack here
+						$IDO_repeat[$ID] = N;continue;}
+					$row = DB::get($p["tbl"],$ID);
+					if ($row === F){$IDO_bad[$ID] = N;continue;}
+					$IDO_fresh[$ID] = $row;}
+				$o["dat"]["fresh" ][$p["tbl"]] = $IDO_fresh;
+				$o["dat"]["repeat"][$p["tbl"]] = $IDO_repeat;
+				$o["dat"]["bad"   ][$p["tbl"]] = $IDO_bad;
 				//....
 				switch ($p["tbl"]){default:;
 					break;case "board"     :;
 					break;case "subboard"  :;
 					break;case "thread"    :;
 					break;case "threadView":
-						$o["dat"][$p["tbl"]] = π_filter($o["dat"][$p["tbl"]],function($E){return kinA("_userID",$E) && $E["_userID"] === DBM_UID();});
+						$o["dat"]["fresh"][$p["tbl"]] = π_filter($o["dat"]["fresh"][$p["tbl"]],function($E){return kinA("_userID",$E) && $E["_userID"] === DBM_UID();});
 					break;case "post"      :;
 					
 					break;case "chart"     :;
 					break;case "tag"       :;
 					break;case "favorite"  :
-						$o["dat"][$p["tbl"]] = π_filter($o["dat"][$p["tbl"]],function($E){return kinA("_userID",$E) && $E["_userID"] === DBM_UID();});
+						$o["dat"]["fresh"][$p["tbl"]] = π_filter($o["dat"]["fresh"][$p["tbl"]],function($E){return kinA("_userID",$E) && $E["_userID"] === DBM_UID();});
 					
 					break;case "user"      :
-						foreach ($o["dat"][$p["tbl"]] as &$E){$userID = $E["_ID"];
+						foreach ($o["dat"]["fresh"][$p["tbl"]] as &$E){$userID = $E["_ID"];
 							unset($E["hashS"]);
 							if ($userID !== DBM_UID()){
 								unset($E["netqN"]);

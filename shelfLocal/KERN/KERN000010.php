@@ -31,6 +31,7 @@ var KERN000010 = {
 				hO     : {},
 				audio  : N,
 				fil    : N,
+				url    : "",
 				state  : "lo", // does not necessarily reflect the actual state of the media - this is the intended state of the media
 				t      : 0,
 				playbackRate : 1,
@@ -86,11 +87,13 @@ var KERN000010 = {
 				state : function(_,base,access){if (!["lo","hi"].includes(_.state)){_.state = "lo";}},
 			},
 			stabilize_SUB : function(){var _ = this.o;
-				if (this.if("fil")){
+				if (this.if("url") || this.if("fil")){
 					if (_.audio !== N){
 						_.audio.pause();
 						_.audio.src = "";
-						_.audio.load();}
+						_.audio.load();}}
+				// the main loading method
+				if (this.if("fil")){
 					if (_.fil !== N){
 						_.audio = new Audio(URL.createObjectURL(_.fil));
 						_.audio.addEventListener("canplaythrough",e=>{});
@@ -99,6 +102,17 @@ var KERN000010 = {
 						_.audio.load();}
 					else{
 						_.audio = N;}}
+				// added-on loading method, only triggers tentatively
+				else if (this.if("url")){
+					if (_.url !== ""){
+						_.audio = new Audio(_.url);
+						_.audio.addEventListener("canplaythrough",e=>{});
+						_.audio.addEventListener("ratechange",e=>{});
+						_.audio.addEventListener("ended",e=>{});
+						_.audio.load();}
+					else{
+						_.audio = N;}}
+				
 				if (this.if("state")){
 					_.assertLightStateF = T;
 					_.skipCorrection();
@@ -107,14 +121,14 @@ var KERN000010 = {
 						_.audio.currentTime = _.t/1000000;}}
 				if (this.if("t","leeway")){
 					_.skipCorrection();}
-				if (this.if("playbackRate","fil")){
+				if (this.if("playbackRate","fil","url")){
 					if (_.audio !== N){
 						_.audio.playbackRate = _.playbackRate;
 						_.audio.defaultPlaybackRate = _.playbackRate;}}
-				if (this.if("volume","fil")){
+				if (this.if("volume","fil","url")){
 					if (_.audio !== N){
 						_.audio.volume = _.volume;}}
-				if (this.if("loopF","fil")){
+				if (this.if("loopF","fil","url")){
 					if (_.audio !== N){
 						_.audio.loop = _.loopF;}}
 				if (typeof _.wO.aba !== "undefined" && this.if("co","bg")){
@@ -179,8 +193,8 @@ var KERN000010 = {
 				_.temporarySkippedF = F;
 				_.counter++;if (_.counter >= 3600){_.counter = 0;}},
 		});
-		oo.portInP .pushA([["pxd",KERNTypeO.number],["fil",KERNTypeO.complexReference],["t",KERNTypeO.number],["state",KERNTypeO.string],["playbackRate",KERNTypeO.number],["volume",KERNTypeO.number],["loopF",KERNTypeO.flag],["leeway",KERNTypeO.number],["aDim",KERNTypeO.number]]);
-		oo.portOutP.pushA([["pxd",KERNTypeO.number],["fil",KERNTypeO.complexReference],["t",KERNTypeO.number],["state",KERNTypeO.string],["playbackRate",KERNTypeO.number],["volume",KERNTypeO.number],["loopF",KERNTypeO.flag],["leeway",KERNTypeO.number],["aDim",KERNTypeO.number]]);
+		oo.portInP .pushA([["pxd",KERNTypeO.number],["url",KERNTypeO.string],["fil",KERNTypeO.complexReference],["t",KERNTypeO.number],["state",KERNTypeO.string],["playbackRate",KERNTypeO.number],["volume",KERNTypeO.number],["loopF",KERNTypeO.flag],["leeway",KERNTypeO.number],["aDim",KERNTypeO.number]]);
+		oo.portOutP.pushA([["pxd",KERNTypeO.number],["url",KERNTypeO.string],["fil",KERNTypeO.complexReference],["t",KERNTypeO.number],["state",KERNTypeO.string],["playbackRate",KERNTypeO.number],["volume",KERNTypeO.number],["loopF",KERNTypeO.flag],["leeway",KERNTypeO.number],["aDim",KERNTypeO.number]]);
 		return oo;},
 	};
 </script>
