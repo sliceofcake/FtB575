@@ -5,6 +5,7 @@
 require_once("../shelfLocal/butler.js");
 require_once("../shelfLocal/specific.js"); ?>
 </script>
+<script src="/harbor/gildas-lormeau-zipjs/WebContent/zip.js"></script>
 <?
 require_once("../shelfLocal/KERN/KERN.php");
 require_once("../shelfLocal/KERN/ZACH.php");
@@ -19,7 +20,8 @@ require_once("../shelfLocal/KERN/KERN000012.php");
 require_once("../shelfLocal/KERN/KERN000013.php");
 require_once("../shelfLocal/KERN/KERN000014.php");
 require_once("../shelfLocal/KERN/KERN000015.php");
-require_once("../shelfLocal/KERN/KERN000016.php"); ?>
+require_once("../shelfLocal/KERN/KERN000016.php");
+require_once("../shelfLocal/KERN/KERN000017.php"); ?>
 <script>
 p.handleH_base = 12;
 p.handleH = p.handleH_base; // subject to change every style recompute cycle
@@ -173,6 +175,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 	var h = 30;
 	elKERNDimO["gameframe0"     ] = {w:300,h:600};
 	elKERNDimO["score0"         ] = {w:350,h};
+	elKERNDimO["osuFile0"       ] = {w:350,h:90};
 	elKERNDimO["audioUrl0"      ] = {w:350,h};
 	elKERNDimO["audioFile0"     ] = {w:350,h};
 	elKERNDimO["chartFile0"     ] = {w:350,h};
@@ -185,6 +188,8 @@ document.addEventListener("DOMContentLoaded",()=>{
 	elKERNDimO["gfScrollSpeed0" ] = {w:350,h};
 	elKERNDimO.forEach(elKERNDim=>{elKERNDim.i = elKERNDim.h + p.handleH;});
 	/***/elKERNPreO[_="score0"         ] = {partID:"KERN000014",title:"score"                     };p.preBuild();
+	p.shift("↓");
+	/***/elKERNPreO[_="osuFile0"       ] = {partID:"KERN000017",title:".osz osu file"};p.preBuild();
 	p.shift("↓");
 	/***/elKERNPreO[_="audioUrl0"      ] = {partID:"KERN000013",title:"audio url",initial:[["lineWrap",F],["txt",""]]};p.preBuild();
 	p.shift("↓");
@@ -213,6 +218,10 @@ document.addEventListener("DOMContentLoaded",()=>{
 	elKERNLinkA.push({from:"gameframe0",to:"chartAudio0",portA:[[["state"],["state"]],[["chartP"],["t"]],[["playbackRate"],["playbackRate"]],[["volume"],["volume"]]]});
 	elKERNLinkA.push({from:"gameframe0",to:"gfFtB4TransTarget0" ,portA:[[["translatedSO","FtB4"],["txt"]]]});
 	elKERNLinkA.push({from:"gameframe0",to:"gfo!m14TransTarget0",portA:[[["translatedSO","o!m14"],["txt"]]]});
+	
+	elKERNLinkA.push({from:"osuFile0"    ,to:"chartAudio0",portA:[[["filAudio"],["fil"]]]});
+	elKERNLinkA.push({from:"osuFile0"    ,to:"gameframe0" ,portA:[[["filChart"],["chartR"]]]});
+	
 	elKERNLinkA.push({from:"audioUrl0"   ,to:"chartAudio0",portA:[[["txt"],["url"]]]});
 	elKERNLinkA.push({from:"audioFile0"  ,to:"chartAudio0",portA:[[["fil"],["fil"]]]});
 	elKERNLinkA.push({from:"chartFile0"  ,to:"gameframe0" ,portA:[[["fil"],["chartR"]]]});
