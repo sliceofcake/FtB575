@@ -17,9 +17,8 @@ With the panel called something like "audio leeway", you can control how tightly
   
 **Remember that the gameframe will play osu files.**  
 (1) Visit [https://osu.ppy.sh/p/beatmaplist?m=3&r=0](https://osu.ppy.sh/p/beatmaplist?m=3&r=0) to find an osu!mania beatmap.  
-(2) Download the beatmap, change/rename its file extension to ".zip", open it.  
-(3) Find the audio file (probably ends with ".mp3"), find the map/chart file (ends with ".osu").  
-(4) Use these files to load the gameframe as usual [we currently support the o!m14 spec.]  
+(2) Download the beatmap, drag&drop it to the panel named something like ".osz osu file".  
+(3) Click on the desired map from the list that appears below.  
   
 **Usage instructions:**  
 (1) Drag&drop your audio file to the panel that says something like "audio file" on the handle [aim for the dashed-line box that says "file" in the south-east corner].  
