@@ -18,6 +18,8 @@ var KERN000013 = {
 				txt   : "",
 				fs    : "inherit", // font-size
 				lineWrap : T,
+				filEnableF : F,
+				fil   : N, // yeah, KERN3 spec is going to the void, rip
 				tx    : [0,0,1  ],
 				co    : [0,1,0.5],
 				bg    : [0,0,0  ,1],
@@ -33,13 +35,24 @@ var KERN000013 = {
 				]]));
 				_.elO.aa = µ.qd(".KERN000013AA"+this.base);},
 			refresh_SUB  : function(){var _ = this.o;
+				if (_.filEnableF && this.if("txt")){
+					var xhr = new XMLHttpRequest();
+					xhr.timeout = 60*1000;
+					xhr.ontimeout = function(){ll("ERROR #710726445233523110985746840489573786738621431974573");};
+					xhr.onreadystatechange = (function(that){return function(ev){
+						if (this.readyState === 4){
+							if (this.status === 200){
+								ll("yo");
+								that.inbound({datA:[["fil",new Blob([this.responseText],{type:"text/plain"})]]});}}};})(this);
+					xhr.open("GET",_.txt,T);
+					xhr.send();}
 				if (_.elO.aa.value !== _.txt){_.elO.aa.value = _.txt;}
 				µ.maCSS(document.head,this.base,µ.cssCompile({
 					[".KERN000013AA"+this.base] : "¥c:"+hsla(_.tx)+";¥fs:"+_.fs+"px;"+(_.lineWrap?"white-space:normal;":"white-space:pre;"),
 				}));},
 		});
-		oo.portInP .pushA([["txt",KERNTypeO.string],["fs",KERNTypeO.string],["lineWrap",KERNTypeO.boolean]]);
-		oo.portOutP.pushA([["txt",KERNTypeO.string],["fs",KERNTypeO.string]]);
+		oo.portInP .pushA([["filEnableF",KERNTypeO.boolean],["fil",KERNTypeO.complexReference],["txt",KERNTypeO.string],["fs",KERNTypeO.string],["lineWrap",KERNTypeO.boolean]]);
+		oo.portOutP.pushA([["filEnableF",KERNTypeO.boolean],["fil",KERNTypeO.complexReference],["txt",KERNTypeO.string],["fs",KERNTypeO.string]]);
 		return oo;},
 	};
 </script>

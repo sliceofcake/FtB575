@@ -178,9 +178,11 @@ document.addEventListener("DOMContentLoaded",()=>{
 	elKERNDimO["osuFile0"       ] = {w:350,h:90};
 	elKERNDimO["audioUrl0"      ] = {w:350,h};
 	elKERNDimO["audioFile0"     ] = {w:350,h};
+	elKERNDimO["chartUrl0"      ] = {w:350,h};
 	elKERNDimO["chartFile0"     ] = {w:350,h};
 	elKERNDimO["chartAudio0"    ] = {w:350,h};
 	elKERNDimO["audioLeeway0"   ] = {w:150,h:20};
+	elKERNDimO["offsetTestFiles0"] = {w:200,h:20};
 	elKERNDimO["gfSeek0"        ] = {w:350,h};
 	elKERNDimO["gfPlaybackRate0"] = {w:350,h};
 	elKERNDimO["gfVolume0"      ] = {w:350,h};
@@ -195,17 +197,26 @@ document.addEventListener("DOMContentLoaded",()=>{
 	p.shift("↓");
 	/***/elKERNPreO[_="audioFile0"     ] = {partID:"KERN000009",title:"audio file"  };p.preBuild();
 	p.shift("↓");
+	/***/elKERNPreO[_="chartUrl0"      ] = {partID:"KERN000013",title:"chart url",initial:[["lineWrap",F],["txt",""],["filEnableF",T]]};p.preBuild();
+	p.shift("↓");
 	/***/elKERNPreO[_="chartFile0"     ] = {partID:"KERN000009",title:"chart file"  };p.preBuild();
 	p.shift("↓");
 	/***/elKERNPreO[_="chartAudio0"    ] = {partID:"KERN000010",title:"chart audio" };p.preBuild();
 	p.shift("↓");
 	/***/elKERNPreO[_="audioLeeway0"   ] = {partID:"KERN000005",title:"audio leeway",initial:[["value",100000],["dirAsc","E"],["min",0],["max",500000],["snap",10000],["valueFxn",v=>(v/1000)+"ms"]]};p.preBuild();
+	p.shift("→");
+	// !!! kludge because KERN3 spec is bad
+	/***/elKERNPreO[_="offsetTestFiles0"] = {partID:"KERN000016",title:"load offset-finder files",initial:[["labelS","load"],["fxnEdgeHi",function(){
+		elKERNPostO["audioUrl0"].inbound({datA:[["txt","https://feelthebeats.se/temporaryDubiousChart/ftbTester/ftbTester.wav"]]});
+		elKERNPostO["chartUrl0"].inbound({datA:[["txt","https://feelthebeats.se/temporaryDubiousChart/ftbTester/ftbTester.txt"]]});
+	}]]};p.preBuild();
+	p.shift("←←");
 	p.shift("↓");
 	/***/elKERNPreO[_="gfSeek0"        ] = {partID:"KERN000005",title:"gf seek"     ,initial:[["value",0],["dirAsc","E"],["ascRoot",0],["min",0],["max",1],["snap",0.000001],["ascMode","additive"],["valueFxn",v=>Math.floor(v*1000)+"‰"]]};p.preBuild();
 	p.shift("↓");
-	/***/elKERNPreO[_="gfVolume0"      ] = {partID:"KERN000005",title:"volume"         ,initial:[["value",      0.8    ],["dirAsc","E"],["ascRoot",0],["min",      0     ],["max",      1     ],["snap",     0.05   ],["ascMode","additive"],["valueFxn",v=>v+"?"]]};p.preBuild();
+	/***/elKERNPreO[_="gfVolume0"      ] = {partID:"KERN000005",title:"volume"         ,initial:[["value",      0.6    ],["dirAsc","E"],["ascRoot",0],["min",      0     ],["max",      1     ],["snap",     0.05   ],["ascMode","additive"],["valueFxn",v=>v+"?"]]};p.preBuild();
 	p.shift("↓");
-	/***/elKERNPreO[_="gfNoteDelay0"   ] = {partID:"KERN000005",title:"note delay"     ,initial:[["value",      0      ],["dirAsc","E"],["ascRoot",0],["min",-750000     ],["max", 500000     ],["snap",  1000      ],["ascMode","additive"],["valueFxn",v=>(v/1000)+"ms"]]};p.preBuild();
+	/***/elKERNPreO[_="gfNoteDelay0"   ] = {partID:"KERN000005",title:"note delay"     ,initial:[["value",      0      ],["dirAsc","E"],["ascRoot",0],["min",-400000     ],["max", 200000     ],["snap",  1000      ],["ascMode","additive"],["valueFxn",v=>(v/1000)+"ms"]]};p.preBuild();
 	p.shift("↓");
 	/***/elKERNPreO[_="gfPlaybackRate0"] = {partID:"KERN000005",title:"playback rate"  ,initial:[["value",      1      ],["dirAsc","E"],["ascRoot",1],["min",      0.1   ],["max",      2     ],["snap",     0.1    ],["ascMode","additive"],["valueFxn",v=>v+"x"]]};p.preBuild();
 	p.shift("↓");
@@ -224,6 +235,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 	
 	elKERNLinkA.push({from:"audioUrl0"   ,to:"chartAudio0",portA:[[["txt"],["url"]]]});
 	elKERNLinkA.push({from:"audioFile0"  ,to:"chartAudio0",portA:[[["fil"],["fil"]]]});
+	elKERNLinkA.push({from:"chartUrl0"   ,to:"gameframe0" ,portA:[[["fil"],["chartR"]]]});
 	elKERNLinkA.push({from:"chartFile0"  ,to:"gameframe0" ,portA:[[["fil"],["chartR"]]]});
 	elKERNLinkA.push({from:"audioLeeway0",to:"chartAudio0",portA:[[["value"],["leeway"]]]});
 	elKERNLinkA.push({from:"gfSeek0"     ,to:"gameframe0" ,portA:[[["value"],["tTentative"]],[["valueValidSignal"],["tTentativeSignal"]]]});

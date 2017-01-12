@@ -90,12 +90,12 @@ var KERN000017 = {
 							]],
 							µ.bscss("⌫",[".button.KERN000017ACA"+this.base,{click:function(that){return function(){that.inbound({datA:[["fil",N]]});};}(this)}],".KERN000017AC"+this.base),
 							[".KERN000017AD"+this.base,_.filChartO.mapV((blob,filename)=>{
-								return [".KERN000017ADA",{click:(function(that,blob){return function(){that.inbound({datA:[["filChart",blob]]});};})(this,blob)},filename];
+								return [".KERN000017ADA",{click:(function(that,blob){return function(){that.inbound({datA:[["filAudio",that.o.filAudio],["filChart",blob]]});};})(this,blob)},filename];
 							})],
 						]]
 					]]);}
 				µ.rr(this.elP,macro);
-				_.elO.fileList = µ.qd(".KERN000017AD"+this.base);;},
+				_.elO.fileList = µ.qd(".KERN000017AD"+this.base);},
 		});
 		oo.portInP .pushA([["fil",KERNTypeO.complexReference],["filAudio",KERNTypeO.complexReference],["filChart",KERNTypeO.complexReference]]);
 		oo.portOutP.pushA([["filAudio",KERNTypeO.complexReference],["filChart",KERNTypeO.complexReference]]);
